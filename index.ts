@@ -1,3 +1,28 @@
-export function sum(a: string, b: string) {
-    return a + b;
+import express, { Response, Request, NextFunction, response } from "express";
+import http from "http";
+import {Application} from "express";
+import { Mongo } from "./src/db";
+import router from './src/routes/routes';
+
+require('dotenv').config();
+
+export var MONGO = Mongo;
+export const app: Application = express();
+const cors = require('cors');
+const bodyparser = require('body-parser');
+const port = process.env.PORT || 3000;
+const seconds = 1000;
+const server: http.Server = app.listen(port, StartServer);
+
+app.use(cors());
+app.use(bodyparser.urlencoded({extended: true}));
+app.use(bodyparser.json());
+app.use("/", router);
+
+function StartServer(): void {
+   Mongo.Connect();
+   console.info(`TypeScript started on port ${port}!`);
 }
+
+// if API response not sent during this time, server will throw timeout error
+server.timeout = 20 * seconds;
