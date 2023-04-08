@@ -1,0 +1,35 @@
+{
+  "name": "payroll",
+  "version": "1.0.0",
+  "description": "Payroll Application done in nodejs and mongoDB",
+  "main": "index.js",
+  "scripts": {
+    "build": "npm install & tsc",
+    "node": "ts-node-dev --respawn --transpile-only index.ts",
+    "start": "tsc & node build/index.js",
+    "test": "jest"
+  },
+  "author": "Abhiram",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "mongodb": "^5.2.0",
+    "nodemon": "^2.0.22",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.0.4"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.21.4",
+    "@babel/preset-env": "^7.21.4",
+    "@babel/preset-typescript": "^7.21.4",
+    "@types/express": "^4.17.17",
+    "@types/jest": "^29.5.0",
+    "@types/mongodb": "^4.0.7",
+    "babel-jest": "^29.5.0",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0"
+  }
+}
