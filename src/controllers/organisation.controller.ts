@@ -4,10 +4,11 @@ import { Collection, Document, ObjectId, Filter } from "mongodb";
 import { tables } from "../services/globals";
 import Controller from "./controller";
 
-export class EmployeeController<T extends Document> extends Controller<T> {
-   constructor(body: T) {
+export class OrganisationController<T extends Document> extends Controller<T> {
+   constructor() {
       super();
-      this.collection = tables?.employee;
-      this.body = body;
+      this.collection = tables?.organisation;
+      this.body = {} as T;
+      this.aggregate = [];
    }
 }

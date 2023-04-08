@@ -9,7 +9,7 @@ enum CheckInStatus {
     pending = 2
 }
 
-interface IEmployeeSchema {
+export interface IEmployeeSchema {
     first_name: string;
     last_name: string;
     phone: number;
@@ -20,12 +20,12 @@ interface IEmployeeSchema {
     manager_id: string;
 }
 
-interface IOrganisationSchema {
+export interface IOrganisationSchema {
     name: string;
     admin_id: string;
 }
 
-interface ILeaveSchema {
+export interface ILeaveSchema {
     employee_id: string;
     from_date: Date;
     to_date: Date;
@@ -34,7 +34,7 @@ interface ILeaveSchema {
     updated_by: string;
 }
 
-interface ICheckInSchema {
+export interface ICheckInSchema {
     employee_id: string;
     check_in: Date;
     check_out: Date;
