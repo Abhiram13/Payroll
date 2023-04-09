@@ -5,9 +5,8 @@ import { tables } from "../services/globals";
 import Controller from "./controller";
 
 export class EmployeeController<T extends Document> extends Controller<T> {
-   constructor(body: T) {
+   constructor() {
       super();
-      this.collection = tables?.employee;
-      this.body = body;
+      this.collection = tables?.employee;      
    }
 }

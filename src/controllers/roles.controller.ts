@@ -4,9 +4,9 @@ import { Collection, Document, ObjectId, Filter } from "mongodb";
 import { tables } from "../services/globals";
 import Controller from "./controller";
 
-export class OrganisationController<T extends Document> extends Controller<T> {
+export class RolesController<T extends Document> extends Controller<T> {
    constructor() {
       super();
-      this.collection = tables?.organisation;      
+      this.collection = tables?.roles;      
    }
 }

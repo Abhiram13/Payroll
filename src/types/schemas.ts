@@ -9,6 +9,13 @@ enum CheckInStatus {
     pending = 2
 }
 
+enum RoleIdentifier {
+    SuperAdmin = 1,
+    OrganisationAdmin = 2,
+    ReportingManager = 3,
+    Employee = 4
+}
+
 export interface IEmployeeSchema {
     first_name: string;
     last_name: string;
@@ -18,6 +25,8 @@ export interface IEmployeeSchema {
     role_id: string;
     date_of_birth: Date;
     manager_id: string;
+    username: string;
+    password: string;
 }
 
 export interface IOrganisationSchema {
@@ -39,4 +48,9 @@ export interface ICheckInSchema {
     check_in: Date;
     check_out: Date;
     status: CheckInStatus;
+}
+
+export interface IRoleSchema {
+    name: string;
+    identifier: RoleIdentifier;
 }
