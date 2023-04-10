@@ -1,3 +1,5 @@
+import { ObjectId } from "mongodb";
+
 export interface ILoginRequest {
    user_name: string;
    password: string;
@@ -22,4 +24,16 @@ export interface IApiResponse<T> {
    status: StatusCodes;
    result?: T;
    message?: string;
+}
+
+export interface IMongo {
+   _id: ObjectId;
+}
+
+export interface IEncryptedToken {
+   id: ObjectId;
+   mId: string;
+   oId: string;
+   rID: string;
+   userName: string;
 }
