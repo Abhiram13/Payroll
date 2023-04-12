@@ -11,7 +11,7 @@ export async function login(req: Request, res: Response) {
    ApiReponse<ILoginResponse | null>(res, status, data, message);
 }
 
-function ApiReponse<T>(res: Response, status: StatusCodes, result?: T, message?: string): void {
+export function ApiReponse<T>(res: Response, status: StatusCodes, result?: T, message?: string): void {
    const response: IApiResponse<T> = { status };
 
    if (result) response.result = result;

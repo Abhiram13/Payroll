@@ -30,9 +30,9 @@ export default class Controller<T extends Document> {
       return data;
    };
 
-   async findById(id: string): Promise<Document | null> {
+   async findById(id: string): Promise<T | null> {
       const collection: Collection<T> = DB.client.db(process.env.DB).collection<T>(this.collection);
-      const data = await collection.aggregate([{$match: {_id: new ObjectId(id)}}]).toArray();
+      const data = await collection.aggregate<T>([{$match: {_id: new ObjectId(id)}}]).toArray();
 
       return data?.length ? data[0] : null;
    };
