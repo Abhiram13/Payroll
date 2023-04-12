@@ -1,8 +1,10 @@
 import express, { Request, Response } from "express";
 import { OrganisationController } from "../controllers/organisation.controller";
-import { IOrganisationSchema } from "../types/schemas";
+import { IOrganisationSchema, IEmployeeSchema } from "../types/schemas";
 import { IEncryptedToken, StatusCodes } from "../types/login.types";
 import { ApiReponse } from "./login.service";
+import { tables } from "./globals";
+import { EmployeeController } from "../controllers/employee.controller";
 
 export async function insertOrganisation(req: Request, res: Response) {
    const controller = new OrganisationController<IOrganisationSchema>();
@@ -13,11 +15,38 @@ export async function insertOrganisation(req: Request, res: Response) {
 }
 
 export async function listOfOrganisations(req: Request, res: Response) {
-   const controller = new OrganisationController<IOrganisationSchema>();
-   controller.aggregate = [];
+   const controller = new EmployeeController<IEmployeeSchema>();
+   const Oid = res?.locals?.payload?.oId;   
+   controller.aggregate = [
+      {$match: {"organisation_id": Oid}},
+      {
+         $addFields: {organisation_id: {$toObjectId: "$organisation_id"}}
+      },
+      {
+         $lookup: {
+            from: tables?.organisation,
+            localField: "organisation_id",
+            foreignField: "_id",
+            as: "Organisation"
+         }
+      },
+      {$project: {username: 0, password: 0}},
+      {$project: {
+         organisation_name: {
+            $reduce: {
+               input: "$Organisation.name",
+               initialValue: "",
+               in: {$concat: ["$$value", "$$this"]}
+            }
+         },
+         first_name: 1, last_name: 1, phone: 1, email: 1, date_of_birth: 1
+      }}    
+   ];
 
-   const message = await controller?.list();
-   res.send(message).end();
+   const data: IEmployeeSchema[] = await controller?.list();
+   const status: StatusCodes = data?.length ? StatusCodes?.OK : StatusCodes?.NO_DATA;
+   const message: string | undefined = data?.length ? undefined : "No Employee found at given Organisation";
+   ApiReponse<IEmployeeSchema[]>(res, status, data, message);
 }
 
 export async function fetchOrganisation(req: Request, res: Response) {
