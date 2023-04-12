@@ -18,7 +18,7 @@ export class LoginController {
          const payload: IEncryptedToken = {id: _id, mId: manager_id, oId: organisation_id, rID: role_id, userName: username};
          const token = Hashing.encrypt<IEncryptedToken>(payload);
 
-         return {employee_name: `${first_name} ${last_name}`, token: token};
+         return {name: `${first_name} ${last_name}`, token: token};
       }
 
       return null;

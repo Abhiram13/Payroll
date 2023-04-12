@@ -7,7 +7,7 @@ export interface ILoginRequest {
 
 export interface ILoginResponse {
    token: string;
-   employee_name: string
+   name: string
 }
 
 export enum StatusCodes {

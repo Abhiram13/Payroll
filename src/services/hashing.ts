@@ -1,10 +1,9 @@
 import * as Hash from 'crypto';
 
 export default class Hashing {
-   static #BYTES = Hash.randomBytes(12);   
+   static #BYTES: Buffer = Hash.randomBytes(12);
 
    static encrypt<T>(payload: T): string {
-      const currentMS: number = new Date().valueOf();
       const stringify = JSON.stringify(payload);
       const algorithm = 'aes-256-gcm';
       const message = stringify;
@@ -16,13 +15,12 @@ export default class Hashing {
       encryptedData += cipher.final('hex');
 
       const authTag: string = cipher.getAuthTag().toString("hex");
-
-      return `${authTag}:${encryptedData}`;
+      return `${authTag}:${encryptedData}:${this.#BYTES.toString('base64')}`;
    }
 
    static decrypt<D>(payload: string): D {
-      const [authTag, encryptedData]: string[] = payload?.split(':');
-      const decipher = Hash.createDecipheriv('aes-256-gcm', process.env.SECRET_KEY as string, this.#BYTES);      
+      const [authTag, encryptedData, bytes]: string[] = payload?.split(':');
+      const decipher = Hash.createDecipheriv('aes-256-gcm', process.env.SECRET_KEY as string, Buffer.from(bytes, 'base64'));
       decipher.setAuthTag(Buffer.from(authTag, 'hex'));
 
       let decData = decipher.update(encryptedData, 'hex', 'utf-8');
