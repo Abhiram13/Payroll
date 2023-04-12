@@ -31,7 +31,7 @@ export interface IMongo {
 }
 
 export interface IEncryptedToken {
-   id: ObjectId;
+   id: string;
    mId: string;
    oId: string;
    rID: string;
