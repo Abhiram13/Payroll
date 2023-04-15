@@ -3,6 +3,7 @@ import Hashing from "./hashing";
 import { IEncryptedToken, StatusCodes } from "../types/login.types";
 import { EmployeeController } from "../controllers/employee.controller";
 import { IEmployeeSchema, RoleIdentifier } from "../types/schemas";
+import { ApiReponse } from "./login.service";
 
 export async function authentication(req: Request, res: Response, next: NextFunction) {
    const token: string | undefined = req?.headers['authorization'];
@@ -19,18 +20,31 @@ export async function authentication(req: Request, res: Response, next: NextFunc
             return;
          }
    
-         res?.status(StatusCodes?.UN_AUTHORISE)?.send({message: "Un Authorise"})?.end();
+         ApiReponse<null>(res, StatusCodes?.UN_AUTHORISE, null, "Un Authorise");
          return;
       };
    
-      res?.status(StatusCodes?.UN_AUTHORISE)?.send({message: "Token is invalid/ not provided"})?.end();
+      ApiReponse<null>(res, StatusCodes?.UN_AUTHORISE, null, "Token is invalid/ not provided");
       return;
    } catch (e: any) {
-      res?.status(StatusCodes?.UN_AUTHORISE)?.send({message: e?.message})?.end();
+      ApiReponse<null>(res, StatusCodes?.UN_AUTHORISE, null, e?.message, true);
       return;      
    }   
 }
 
 export async function authorization(req: Request, res: Response, next: NextFunction, roles: RoleIdentifier[]) {
+   try {
+      const payload: IEncryptedToken = res?.locals?.payload;
 
+      if (!roles?.includes(payload?.roleIdentifier)) {
+         ApiReponse<null>(res, StatusCodes?.FORBIDDEN, null, "Current user do not have access to this API", true);
+         return;
+      }
+
+      next();
+      return;
+   } catch (e: any) {
+      ApiReponse<null>(res, StatusCodes?.UN_AUTHORISE, null, e?.message, true);
+      return;
+   }
 }

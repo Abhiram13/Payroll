@@ -54,3 +54,7 @@ export interface IRoleSchema {
     name: string;
     identifier: RoleIdentifier;
 }
+
+export type IProjectFields<T> = {
+    [key in keyof T]: number;
+}

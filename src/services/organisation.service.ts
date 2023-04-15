@@ -1,14 +1,52 @@
 import express, { Request, Response } from "express";
 import { OrganisationController } from "../controllers/organisation.controller";
-import { IOrganisationSchema, IEmployeeSchema } from "../types/schemas";
+import { IOrganisationSchema, IEmployeeSchema, IRoleSchema, RoleIdentifier } from "../types/schemas";
 import { IEncryptedToken, StatusCodes } from "../types/login.types";
 import { ApiReponse } from "./login.service";
 import { tables } from "./globals";
 import { EmployeeController } from "../controllers/employee.controller";
+import { RolesController } from "../controllers/roles.controller";
+
+async function fetchEmployee(id: string): Promise<{role_id: string} | null> {
+   try {
+      const empController = new EmployeeController<IEmployeeSchema>();
+      const result: {role_id: string} | null = await empController?.findById(id, {role_id: 1}, {_id: 0});
+      return result;
+   } catch (e: any) {
+      console.log('#1 ', e?.message);
+      return null;
+   }
+}
+
+async function fetchRoleIdentifier(id: string): Promise<{identifier: number} | null> {
+   try {
+      const roleController = new RolesController<IRoleSchema>();
+      const result: {identifier: RoleIdentifier} | null = await roleController.findById(id, {identifier: 1}, {_id: 0});
+      return result;
+   } catch (e: any) {
+      console.log('#2 ', e?.message);
+      return null;
+   }
+}
 
 export async function insertOrganisation(req: Request, res: Response) {
-   const controller = new OrganisationController<IOrganisationSchema>();
-   controller.body = req?.body;
+   const controller = new OrganisationController<IOrganisationSchema>();    
+   const payload: IOrganisationSchema = req?.body;   
+   const employee = await fetchEmployee(payload?.admin_id);   
+
+   if (!employee) {
+      ApiReponse<null>(res, StatusCodes?.BAD_REQUEST, null, "Employee do not exist with given Admin Id");
+      return;
+   }
+
+   const role = await fetchRoleIdentifier(employee?.role_id);
+
+   if (role?.identifier !== RoleIdentifier?.OrganisationAdmin) {
+      ApiReponse<null>(res, StatusCodes?.BAD_REQUEST, null, "Invalid Admin id");
+      return;
+   }
+
+   controller.body = payload;
 
    const message = await controller?.insert();
    res.send(message).end();

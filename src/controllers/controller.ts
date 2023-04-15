@@ -2,7 +2,8 @@ import express, { Request, Response } from "express";
 import { MONGO as DB } from "../../index";
 import { Collection, Document, Filter, UpdateFilter } from "mongodb";
 import {ObjectId} from "bson";
-import { StatusCodes } from "../types/login.types";
+import { IMongo, StatusCodes } from "../types/login.types";
+import { IProjectFields } from "../types/schemas";
 
 export default class Controller<T extends Document> {
    collection: string;
@@ -40,9 +41,16 @@ export default class Controller<T extends Document> {
       return data;
    };
 
-   async findById(id: string): Promise<T | null> {
+   async findById(id: string, includeFields: Partial<IProjectFields<T & IMongo>> = {}, excludeFields: Partial<IProjectFields<T & IMongo>> = {}): Promise<T | null> {
       const collection: Collection<T> = DB.client.db(process.env.DB).collection<T>(this.collection);
-      const data = await collection.aggregate<T>([{$match: {_id: new ObjectId(id)}}]).toArray();
+      const aggregate: Document[] = [
+         {$match: {_id: new ObjectId(id)}}
+      ];
+
+      Object.keys(includeFields)?.length && aggregate.push({$project: includeFields});
+      Object.keys(excludeFields)?.length && aggregate.push({$project: excludeFields});
+
+      const data = await collection.aggregate<T>(aggregate).toArray();
 
       return data?.length ? data[0] : null;
    };

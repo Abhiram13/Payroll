@@ -25,6 +25,7 @@ export interface IApiResponse<T> {
    status: StatusCodes;
    result?: T;
    message?: string;
+   error: boolean;
 }
 
 export interface IMongo {

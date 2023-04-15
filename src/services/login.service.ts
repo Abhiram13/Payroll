@@ -11,12 +11,12 @@ export async function login(req: Request, res: Response) {
 
       ApiReponse<ILoginResponse | null>(res, status, data, message);
    } catch (e) {
-      ApiReponse<null>(res, StatusCodes?.UN_AUTHORISE, null, "Invalid Credentials");
+      ApiReponse<null>(res, StatusCodes?.UN_AUTHORISE, null, "Invalid Credentials", true);
    }
 }
 
-export function ApiReponse<T>(res: Response, status: StatusCodes, result?: T, message?: string): void {
-   const response: IApiResponse<T> = { status };
+export function ApiReponse<T>(res: Response, status: StatusCodes, result?: T, message?: string, error: boolean = false): void {
+   const response: IApiResponse<T> = { status, error };
 
    if (result) response.result = result;
    if (message) response.message = message;
