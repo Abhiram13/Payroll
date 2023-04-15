@@ -3,12 +3,16 @@ import { LoginController } from "../controllers/login.controller";
 import { StatusCodes, IApiResponse, ILoginResponse } from "../types/login.types";
 
 export async function login(req: Request, res: Response) {
-   const controller = new LoginController();
-   const data = await controller?.login(req?.body);   
-   const status: StatusCodes = data?.token ? StatusCodes.OK : StatusCodes.NO_DATA;
-   const message: string | undefined  = data ? undefined : "Invalid Credentials";
+   try {
+      const controller = new LoginController();
+      const data = await controller?.login(req?.body);
+      const status: StatusCodes = data?.token ? StatusCodes.OK : StatusCodes.NO_DATA;
+      const message: string | undefined = data ? undefined : "Invalid Credentials";
 
-   ApiReponse<ILoginResponse | null>(res, status, data, message);
+      ApiReponse<ILoginResponse | null>(res, status, data, message);
+   } catch (e) {
+      ApiReponse<null>(res, StatusCodes?.UN_AUTHORISE, null, "Invalid Credentials");
+   }
 }
 
 export function ApiReponse<T>(res: Response, status: StatusCodes, result?: T, message?: string): void {

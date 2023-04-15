@@ -9,7 +9,7 @@ enum CheckInStatus {
     pending = 2
 }
 
-enum RoleIdentifier {
+export enum RoleIdentifier {
     SuperAdmin = 1,
     OrganisationAdmin = 2,
     ReportingManager = 3,

@@ -16,9 +16,9 @@ export async function insertOrganisation(req: Request, res: Response) {
 
 export async function listOfOrganisations(req: Request, res: Response) {
    const controller = new EmployeeController<IEmployeeSchema>();
-   const Oid = res?.locals?.payload?.oId;   
+   const orgId: string = res?.locals?.payload?.organisationId;   
    controller.aggregate = [
-      {$match: {"organisation_id": Oid}},
+      {$match: {"organisation_id": orgId}},
       {
          $addFields: {organisation_id: {$toObjectId: "$organisation_id"}}
       },
@@ -52,7 +52,7 @@ export async function listOfOrganisations(req: Request, res: Response) {
 export async function fetchOrganisation(req: Request, res: Response) {
    const token: IEncryptedToken | null = res?.locals?.payload;
    const controller = new OrganisationController<IOrganisationSchema>();
-   const organisation: IOrganisationSchema | null = await controller.findById(token?.oId || "");
+   const organisation: IOrganisationSchema | null = await controller.findById(token?.organisationId || "");
    const status: StatusCodes = organisation ? StatusCodes?.OK : StatusCodes?.NO_DATA;
    const message: string | undefined = organisation ? undefined : 'No Organisation found';   
    

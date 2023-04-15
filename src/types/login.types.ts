@@ -1,4 +1,5 @@
 import { ObjectId } from "mongodb";
+import { RoleIdentifier } from "./schemas";
 
 export interface ILoginRequest {
    user_name: string;
@@ -31,9 +32,14 @@ export interface IMongo {
 }
 
 export interface IEncryptedToken {
-   id: string;
-   mId: string;
-   oId: string;
-   rID: string;
+   id: ObjectId;
+   managerId: string;
+   organisationId: string;
+   roleId: string;
+   roleIdentifier: RoleIdentifier;
    userName: string;
+}
+
+export interface ILoginRoleIdentifier {
+   identifier: RoleIdentifier;
 }

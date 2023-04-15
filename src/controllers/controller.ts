@@ -1,7 +1,8 @@
 import express, { Request, Response } from "express";
 import { MONGO as DB } from "../../index";
-import { Collection, Document, Filter } from "mongodb";
+import { Collection, Document, Filter, UpdateFilter } from "mongodb";
 import {ObjectId} from "bson";
+import { StatusCodes } from "../types/login.types";
 
 export default class Controller<T extends Document> {
    collection: string;
@@ -14,13 +15,22 @@ export default class Controller<T extends Document> {
       this.aggregate = [];
    }
 
-   async insert(): Promise<string> {
+   async insert(): Promise<StatusCodes> {
       const collection: Collection = DB.client.db(process.env.DB).collection(this.collection);
       const document = collection.insertOne(this.body);
       const { acknowledged } = await document;
-      const message: string = acknowledged ? "Document inserted successfully" : "Inserting document failed";
+      const status: StatusCodes = acknowledged ? StatusCodes?.OK : StatusCodes?.NOT_MODIFIED
 
-      return message
+      return status;
+   };
+
+   async update(filter: Filter<Document> = {}, set: UpdateFilter<T>): Promise<StatusCodes> {
+      const collection: Collection = DB.client.db(process.env.DB).collection(this.collection);
+      const document = collection.updateOne(filter, set)
+      const { acknowledged } = await document;
+      const status: StatusCodes = acknowledged ? StatusCodes?.OK : StatusCodes?.NOT_MODIFIED
+
+      return status;
    };
 
    async list(): Promise<T[]> {
