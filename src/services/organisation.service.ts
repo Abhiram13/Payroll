@@ -32,24 +32,19 @@ async function fetchRoleIdentifier(id: string): Promise<{identifier: number} | n
 export async function insertOrganisation(req: Request, res: Response) {
    const controller = new OrganisationController<IOrganisationSchema>();    
    const payload: IOrganisationSchema = req?.body;   
-   const employee = await fetchEmployee(payload?.admin_id);   
+   const employee = await fetchEmployee(payload?.admin_id);
+   const role = await fetchRoleIdentifier(employee?.role_id || "");   
 
-   if (!employee) {
-      ApiReponse<null>(res, StatusCodes?.BAD_REQUEST, null, "Employee do not exist with given Admin Id");
-      return;
-   }
-
-   const role = await fetchRoleIdentifier(employee?.role_id);
-
-   if (role?.identifier !== RoleIdentifier?.OrganisationAdmin) {
+   if (employee && role?.identifier !== RoleIdentifier?.OrganisationAdmin) {
       ApiReponse<null>(res, StatusCodes?.BAD_REQUEST, null, "Invalid Admin id");
       return;
    }
 
    controller.body = payload;
 
-   const message = await controller?.insert();
-   res.send(message).end();
+   const status: StatusCodes = await controller?.insert();
+   const message: string = status === StatusCodes?.OK ? "Organisation inserted successfully" : "Insering Organisation failed";
+   ApiReponse<null>(res, status, null, message);
 }
 
 export async function listOfOrganisations(req: Request, res: Response) {
