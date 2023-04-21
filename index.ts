@@ -3,6 +3,7 @@ import http from "http";
 import {Application} from "express";
 import { Mongo } from "./src/db";
 import router from './src/routes/routes';
+import Logger from "./src/services/logger.service";
 
 require('dotenv').config();
 
@@ -21,7 +22,7 @@ app.use("/", router);
 
 function StartServer(): void {
    Mongo.Connect();
-   console.info(`TypeScript started on port ${port}!`);
+   Logger.info(`TypeScript started on port ${port}!`);   
 }
 
 // if API response not sent during this time, server will throw timeout error

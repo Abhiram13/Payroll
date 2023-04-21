@@ -1,10 +1,22 @@
 import { Request, Response } from "express";
 import { EmployeeController } from "../controllers/employee.controller";
-import { IEmployeeSchema } from "../types/schemas";
+import { IEmployeeSchema, IOrganisationSchema } from "../types/schemas";
+import { OrganisationController } from "../controllers/organisation.controller";
+import { ObjectId } from "mongodb";
+import { ApiReponse } from "./login.service";
+import { StatusCodes } from "../types/login.types";
 
 export async function insertEmployee(req: Request, res: Response) {
    const body: IEmployeeSchema = req?.body;
-   const controller = new EmployeeController<IEmployeeSchema>();
+   const controller = new EmployeeController<IEmployeeSchema>();   
+   const orgControler = new OrganisationController<{_id: ObjectId}>();
+   const org = await orgControler?.findById(body?.organisation_id, {_id: 1});
+
+   if (org?._id?.toString() !== body?.organisation_id) {
+      ApiReponse<null>(res, StatusCodes?.BAD_REQUEST, null, "Organisation does not exist with given value");
+      return;
+   }
+   
    controller.body = body;
 
    const message = await controller?.insert();   

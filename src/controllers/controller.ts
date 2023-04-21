@@ -42,16 +42,20 @@ export default class Controller<T extends Document> {
    };
 
    async findById(id: string, includeFields: Partial<IProjectFields<T & IMongo>> = {}, excludeFields: Partial<IProjectFields<T & IMongo>> = {}): Promise<T | null> {
-      const collection: Collection<T> = DB.client.db(process.env.DB).collection<T>(this.collection);
-      const aggregate: Document[] = [
-         {$match: {_id: new ObjectId(id)}}
-      ];
+      try {
+         const collection: Collection<T> = DB.client.db(process.env.DB).collection<T>(this.collection);
+         const aggregate: Document[] = [
+            { $match: { _id: new ObjectId(id) } }
+         ];
 
-      Object.keys(includeFields)?.length && aggregate.push({$project: includeFields});
-      Object.keys(excludeFields)?.length && aggregate.push({$project: excludeFields});
+         Object.keys(includeFields)?.length && aggregate.push({ $project: includeFields });
+         Object.keys(excludeFields)?.length && aggregate.push({ $project: excludeFields });
 
-      const data = await collection.aggregate<T>(aggregate).toArray();
+         const data = await collection.aggregate<T>(aggregate).toArray();
 
-      return data?.length ? data[0] : null;
+         return data?.length ? data[0] : null;
+      } catch (e) {
+         return null;
+      }
    };
 }
