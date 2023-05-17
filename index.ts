@@ -8,17 +8,19 @@ import Logger from "./src/services/logger.service";
 require('dotenv').config();
 
 export var MONGO = Mongo;
-export const app: Application = express();
+const app: Application = express();
 const cors = require('cors');
 const bodyparser = require('body-parser');
 const port = process.env.PORT || 3000;
 const seconds = 1000;
-const server: http.Server = app.listen(port, StartServer);
+export const server: http.Server = app.listen(port, StartServer);
 
 app.use(cors());
 app.use(bodyparser.urlencoded({extended: true}));
 app.use(bodyparser.json());
 app.use("/", router);
+
+export {app};
 
 function StartServer(): void {
    Mongo.Connect();
