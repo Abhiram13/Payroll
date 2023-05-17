@@ -10,9 +10,9 @@ type LogType = "ERROR" | "LOG" | "INFO" | "WARN";
 export async function writeFile(): Promise<void> {
    try {            
       await fs?.mkdir(folderWithPath, {recursive: true});      
-      Logger.info('file was written');
+      Logger.info('Log Folder was created');
    } catch (e: any) {
-      Logger.error('error at writing file: ', e?.message);
+      Logger.error('error at creating Log folder: ', e?.message);
    }
 }
 
@@ -22,7 +22,7 @@ async function appendFile(content: any, type: LogType = 'LOG'): Promise<void> {
       const logInformation: string = `${TIMESTAMP} [${type}] - ${content}\n`;
       fs.appendFile(`${folderWithPath}/${fileName}.log`, logInformation);
    } catch (e: any) {
-      Logger.error('Error at appending file: ', e);
+      Logger.error(`Error at appending file at ${folderWithPath}/${fileName}.log: `, e);
    }
 }
 

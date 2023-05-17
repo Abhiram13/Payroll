@@ -1,16 +1,18 @@
 import express, { Request, Response } from "express";
 import { LoginController } from "../controllers/login.controller";
 import { StatusCodes, IApiResponse, ILoginResponse } from "../types/login.types";
+import Logger from "./logger.service";
 
 export async function login(req: Request, res: Response) {
    try {
-      const controller = new LoginController();
-      const data = await controller?.login(req?.body);
+      const controller = new LoginController(req?.body);
+      const data = await controller?.login();
       const status: StatusCodes = data?.token ? StatusCodes.OK : StatusCodes.NO_DATA;
       const message: string | undefined = data ? undefined : "Invalid Credentials";
 
       ApiReponse<ILoginResponse | null>(res, status, data, message);
-   } catch (e) {
+   } catch (e: any) {
+      Logger?.error(e?.message);
       ApiReponse<null>(res, StatusCodes?.UN_AUTHORISE, null, "Invalid Credentials", true);
    }
 }

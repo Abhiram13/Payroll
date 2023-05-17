@@ -5,15 +5,32 @@ import Hashing from "../services/hashing";
 import { RolesController } from "./roles.controller";
 import { ObjectId } from "mongodb";
 
+type EmployeeWithMongo = (IEmployeeSchema & IMongo);
+
 export class LoginController {
-   async login(payload: ILoginRequest): Promise<ILoginResponse | null> {
+   #payload: ILoginRequest;
+
+   constructor (payload: ILoginRequest) {
+      this.#payload = payload;
+   }
+
+   async #employeeList(): Promise<EmployeeWithMongo[] | null> {
       try {
          const controller = new EmployeeController<IEmployeeSchema & IMongo>();
          controller.aggregate = [
-            { $match: { $and: [{ username: payload?.user_name, password: payload?.password }] } }
+            { $match: { $and: [{ username: this.#payload?.user_name, password: this.#payload?.password }] } }
          ];
 
-         const list: (IEmployeeSchema & IMongo)[] = await controller?.list();
+         const list: EmployeeWithMongo[] = await controller?.list();
+         return list;
+      } catch (e) {
+         return null;
+      }
+   }
+
+   async login(): Promise<ILoginResponse | null> {
+      try {
+         const list: EmployeeWithMongo[] | null = await this.#employeeList();
 
          if (list?.length) {
             let { _id, manager_id, organisation_id, role_id, username, first_name, last_name } = list[0];
@@ -32,7 +49,7 @@ export class LoginController {
                return null;
             }
 
-            const payload: IEncryptedToken = { id: _id, managerId: manager_id, organisationId: organisation_id, roleId: role_id, roleIdentifier: identifier, userName: username };
+            const payload: IEncryptedToken = { id: _id, managerId: manager_id, organisationId: organisation_id, roleId: role_id, roleIdentifier: identifier, userName: username, time: new Date().getTime() };
             const token = Hashing.encrypt<IEncryptedToken>(payload);
 
             return { name: `${first_name} ${last_name}`, token: token };

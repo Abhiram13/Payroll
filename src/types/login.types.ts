@@ -39,6 +39,7 @@ export interface IEncryptedToken {
    roleId: string;
    roleIdentifier: RoleIdentifier;
    userName: string;
+   time: number;
 }
 
 export interface ILoginRoleIdentifier {
