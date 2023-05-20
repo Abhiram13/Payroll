@@ -10,7 +10,7 @@ describe("POST /login", () => {
             password: ""
          });
 
-         expect(res.statusCode).toBe(200);
+         expect(res.statusCode).toBe(400);
       });
    });
 });
