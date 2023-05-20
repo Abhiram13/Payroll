@@ -9,7 +9,7 @@ require('dotenv').config();
 
 export var MONGO = Mongo;
 const app: Application = express();
-const cors = require('cors');
+const cors = require('cors'); 
 const bodyparser = require('body-parser');
 const port = process.env.PORT || 3000;
 const seconds = 1000;

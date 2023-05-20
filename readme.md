@@ -1,0 +1,1 @@
+[![Node.js CI](https://github.com/Abhiram13/Payroll/actions/workflows/node.yaml/badge.svg)](https://github.com/Abhiram13/Payroll/actions/workflows/node.yaml)
