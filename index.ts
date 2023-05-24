@@ -13,7 +13,14 @@ const cors = require('cors');
 const bodyparser = require('body-parser');
 const port = process.env.PORT || 3000;
 const seconds = 1000;
-export const server: http.Server = app.listen(port, StartServer);
+let server: http.Server;
+
+if (process?.env?.NODE_ENV !== 'test') {
+   server = app.listen(port, StartServer);
+   
+   // if API response not sent during this time, server will throw timeout error
+   server.timeout = 20 * seconds;
+}
 
 app.use(cors());
 app.use(bodyparser.urlencoded({extended: true}));
@@ -26,6 +33,3 @@ function StartServer(): void {
    Mongo.Connect();
    Logger.info(`TypeScript started on port ${port}!`);   
 }
-
-// if API response not sent during this time, server will throw timeout error
-server.timeout = 20 * seconds;
