@@ -1,7 +1,7 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: Node.js Automated testing
+name: Node.js testing
 
 on:
   push:
@@ -10,14 +10,28 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  deployment:
     runs-on: ubuntu-latest
+    environment: dev    
     strategy:
       matrix:
         node-version: [18.x]
 
     steps:
     - uses: actions/checkout@v3
+    - name: create env file
+      run: |
+        touch .env
+        echo DB=${{ vars.DB }} >> .env
+        echo HOST=${{ vars.HOST }} >> .env
+        echo PASSWORD=${{ vars.PASSWORD }} >> .env
+        echo USERNAME=${{ vars.USERNAME }} >> .env
+        echo EMPLOYEE=${{ vars.EMPLOYEE }} >> .env
+        echo SECRET_KEY=${{ vars.SECRET_KEY }} >> .env
+        echo CHECKINS=${{ vars.CHECKINS }} >> .env
+        echo LEAVES=${{ vars.LEAVES }} >> .env
+        echo ORGANISATION=${{ vars.ORGANISATION }} >> .env
+        echo ROLES=${{ vars.ROLES }} >> .env
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:

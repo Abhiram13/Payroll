@@ -9,6 +9,7 @@ export class Mongo {
          await Mongo.client.connect();
          Mongo.client.db(process.env.DB);
       } catch (e: any) {
+         console.log('ENV IS: ', process?.env);
          console.error(e?.message);
       }
    }
