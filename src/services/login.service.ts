@@ -13,6 +13,7 @@ export async function login(req: Request, res: Response) {
       ApiReponse<ILoginResponse | null>(res, status, data, message);
    } catch (e: any) {
       Logger?.error(e?.message);
+      console.log('Error caught at: ', e);
       ApiReponse<null>(res, StatusCodes?.UN_AUTHORISE, null, "Invalid Credentials", true);
    }
 }
