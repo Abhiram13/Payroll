@@ -16,6 +16,7 @@ const seconds = 1000;
 let server: http.Server;
 
 if (process?.env?.NODE_ENV !== 'test') {
+   console.log('HITTED');
    server = app.listen(port, StartServer);
    
    // if API response not sent during this time, server will throw timeout error
