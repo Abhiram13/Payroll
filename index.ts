@@ -16,7 +16,6 @@ const seconds = 1000;
 let server: http.Server;
 
 // if (process?.env?.NODE_ENV !== 'test') {
-   console.log('HITTED');
    server = app.listen(port, StartServer);
    
    // if API response not sent during this time, server will throw timeout error
@@ -28,7 +27,7 @@ app.use(bodyparser.urlencoded({extended: true}));
 app.use(bodyparser.json());
 app.use("/", router);
 
-export {app};
+export {app, server};
 
 function StartServer(): void {
    Mongo.Connect();

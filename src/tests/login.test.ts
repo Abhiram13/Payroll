@@ -1,6 +1,6 @@
 import {describe, test} from '@jest/globals';
 import request from 'supertest';
-import { app, MONGO } from '../..';
+import { app, MONGO, server } from '../..';
 
 // to run a specific file, use command `npm test -- src/tests/<filename>.<ext>
 // to run a specific test case, use command `npm test -- -t '<test case name mentioned in describe callback || test case name mentioned in test callback>, 
@@ -35,6 +35,6 @@ describe("POST /login test", () => {
 });
 
 afterAll(() => {
-   // server?.close();
+   server?.close();
    MONGO.client.close();
 });

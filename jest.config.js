@@ -3,5 +3,8 @@ module.exports = {
     transform: {
         '^.+\\.(ts|tsx)?$': 'ts-jest',
         "^.+\\.(js|jsx)$": "babel-jest",
-    }
+    },
+    testMatch: [
+        "<rootDir>/src/tests/*.test.ts"
+    ]
 };
