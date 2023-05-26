@@ -13,6 +13,8 @@ describe("POST /login", () => {
          password: "123"
       });
 
+      console.log({res});
+
       expect(res?.body?.status).toBe(200);
    });
 
