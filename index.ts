@@ -15,13 +15,13 @@ const port = process.env.PORT || 3000;
 const seconds = 1000;
 let server: http.Server;
 
-if (process?.env?.NODE_ENV !== 'test') {
+// if (process?.env?.NODE_ENV !== 'test') {
    console.log('HITTED');
    server = app.listen(port, StartServer);
    
    // if API response not sent during this time, server will throw timeout error
    server.timeout = 20 * seconds;
-}
+// }
 
 app.use(cors());
 app.use(bodyparser.urlencoded({extended: true}));
