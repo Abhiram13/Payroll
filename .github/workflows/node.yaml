@@ -11,8 +11,7 @@ on:
 
 jobs:
   deployment:
-    runs-on: ubuntu-latest
-    environment: dev    
+    runs-on: ubuntu-latest    
     strategy:
       matrix:
         node-version: [18.x]
