@@ -9,4 +9,4 @@ router.get("/", (req, res) => res.send('Hello World'));
 router.post("/login", login);
 router.use("/api", authentication, apiRouter);
 
-export default router;
+export default router; 
