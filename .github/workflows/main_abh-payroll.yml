@@ -15,7 +15,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
+      - name: create env file
+        run: |
+          touch .env
+          echo DB=${{ vars.DB }} >> .env
+          echo HOST=${{ vars.HOST }} >> .env
+          echo PASSWORD=${{ vars.PASSWORD }} >> .env
+          echo USERNAME=${{ vars.USERNAME }} >> .env
+          echo EMPLOYEE=${{ vars.EMPLOYEE }} >> .env
+          echo SECRET_KEY=${{ vars.SECRET_KEY }} >> .env
+          echo CHECKINS=${{ vars.CHECKINS }} >> .env
+          echo LEAVES=${{ vars.LEAVES }} >> .env
+          echo ORGANISATION=${{ vars.ORGANISATION }} >> .env
+          echo ROLES=${{ vars.ROLES }} >> .env
       - name: Set up Node.js version
         uses: actions/setup-node@v1
         with:
