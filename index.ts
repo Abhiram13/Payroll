@@ -4,12 +4,12 @@ import {Application} from "express";
 import { Mongo } from "./src/db";
 import router from './src/routes/routes';
 import Logger from "./src/services/logger.service";
+import cors from 'cors';
 
 require('dotenv').config();
 
 export var MONGO = Mongo;
 const app: Application = express();
-const cors = require('cors'); 
 const bodyparser = require('body-parser');
 const port = process.env.PORT || 3000;
 const seconds = 1000;
@@ -22,7 +22,10 @@ if (process?.env?.NODE_ENV !== 'test') {
    server.timeout = 20 * seconds;
 }
 
-app.use(cors());
+app.use(cors({
+   origin: ['http://localhost:3000', 'http://localhost:3002'],
+   optionsSuccessStatus: 200,
+}));
 app.use(bodyparser.urlencoded({extended: true}));
 app.use(bodyparser.json());
 app.use("/", router);
