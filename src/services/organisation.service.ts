@@ -7,31 +7,39 @@ import { EmployeeController } from "../controllers/employee.controller";
 import { RolesController } from "../controllers/roles.controller";
 
 export async function insertOrganisation(req: Request, res: Response) {
-   const controller = new OrganisationController<IOrganisationSchema>();
+   
+   // defining messages based on status codes
+   let messageMap = new Map<StatusCodes, string>();
+   messageMap.set(StatusCodes?.OK, "Organisation inserted successfully");
+   messageMap.set(StatusCodes?.NOT_MODIFIED, "Insering Organisation failed");
+   messageMap.set(StatusCodes?.BAD_REQUEST, "Provided payload in invalid / invalid admin_id");
+   messageMap.set(StatusCodes?.FORBIDDEN, "Current user do not have access to create an organisation");
+
+   const controller = new OrganisationController();
    const empController = new EmployeeController();
    const roleController = new RolesController();
    const payload: IOrganisationSchema = req?.body;   
    const employee = await empController?.fetchEmployeeByAdminId(payload?.admin_id);
+   
+   // check if employee is valid
+   if (!employee?.role_id) {
+      ApiReponse<null>({res, status: StatusCodes?.BAD_REQUEST, message: messageMap.get(StatusCodes?.BAD_REQUEST)});
+      return;
+   }
+
    const role = await roleController?.fetchRoleIdentifierByEmpRoleId(employee?.role_id || "");
 
-   if (employee && role?.identifier !== RoleIdentifier?.OrganisationAdmin) {
-      ApiReponse<null>({
-         res,
-         status: StatusCodes?.BAD_REQUEST,
-         message: "Invalid admin_id"
-      });
+   // if user is valid, but not organisation admin
+   if (role?.identifier !== RoleIdentifier?.OrganisationAdmin) {
+      ApiReponse<null>({res, status: StatusCodes?.FORBIDDEN, message: messageMap?.get(StatusCodes?.FORBIDDEN)});
       return;
    }
 
    controller.body = payload;
 
+   // inserting organisation in DB
    const status: StatusCodes = await controller?.insert();
-   const message: string = status === StatusCodes?.OK ? "Organisation inserted successfully" : "Insering Organisation failed";   
-   ApiReponse<null>({
-      res,
-      status: status,
-      message: message
-   });
+   ApiReponse<null>({res, status: status, message: messageMap?.get(status)});
 }
 
 export async function listOfOrganisations(req: Request, res: Response) {
@@ -76,7 +84,7 @@ export async function listOfOrganisations(req: Request, res: Response) {
 
 export async function fetchOrganisation(req: Request, res: Response) {
    const token: IEncryptedToken | null = res?.locals?.payload;
-   const controller = new OrganisationController<IOrganisationSchema>();
+   const controller = new OrganisationController();
    const organisation: IOrganisationSchema | null = await controller.findById(token?.organisationId || "");
    const status: StatusCodes = organisation ? StatusCodes?.OK : StatusCodes?.NO_DATA;
    const message: string | undefined = organisation ? undefined : 'No Organisation found';   

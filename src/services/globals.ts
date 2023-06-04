@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { NextFunction, Response, Request } from "express";
 import { IApiResponse, IApiResponsePayload } from "../types/login.types"
 import { ICallbackResult, StatusCodes } from "../types/login.types";
 import { IEmployeeSchema } from "../types/schemas"
@@ -37,7 +37,7 @@ export async function TimerMethod<T>(res: Response, callback: () => Promise<ICal
 
     const x = await callback();
 
-    isTimedOut === false && ApiReponse<IEmployeeSchema[]>({ res, status: StatusCodes?.OK, result: x?.result as IEmployeeSchema[] });
+    isTimedOut === false && ApiReponse<T | undefined>({ res, status: StatusCodes?.OK, result: x?.result, message: x?.message });
 
     clearTimeout(timer);
 }

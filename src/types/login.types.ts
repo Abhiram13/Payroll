@@ -60,6 +60,6 @@ export interface ILoginRoleIdentifier {
 
 export interface ICallbackResult<T> {
    status: StatusCodes;
-   result: T;
+   result?: T;
    message?: string;
 }

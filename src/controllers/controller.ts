@@ -17,12 +17,16 @@ export default class Controller<T extends Document> {
    }
 
    async insert(): Promise<StatusCodes> {
-      const collection: Collection = DB.client.db(process.env.DB).collection(this.collection);
-      const document = collection.insertOne(this.body);
-      const { acknowledged } = await document;
-      const status: StatusCodes = acknowledged ? StatusCodes?.OK : StatusCodes?.NOT_MODIFIED
+      try {
+         const collection: Collection = DB.client.db(process.env.DB).collection(this.collection);
+         const document = collection.insertOne(this.body);
+         const { acknowledged } = await document;
+         const status: StatusCodes = acknowledged ? StatusCodes?.OK : StatusCodes?.NOT_MODIFIED
 
-      return status;
+         return status;
+      } catch(e) {
+         return StatusCodes?.BAD_REQUEST;
+      }
    };
 
    async update(filter: Filter<Document> = {}, set: UpdateFilter<T>): Promise<StatusCodes> {
