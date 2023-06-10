@@ -5,6 +5,8 @@ import { Mongo } from "./src/db";
 import router from './src/routes/routes';
 import Logger from "./src/services/logger.service";
 import cors from 'cors';
+import path from 'path';
+import * as fs from 'fs';
 
 require('dotenv').config();
 
@@ -20,6 +22,11 @@ if (process?.env?.NODE_ENV !== 'test') {
    
    // if API response not sent during this time, server will throw timeout error
    server.timeout = 20 * seconds;
+
+   server.on('request', (req, res) => {      
+      res?.removeHeader('X-Powered-By');
+      console.log(res);
+   });
 }
 
 app.use(cors({
@@ -30,9 +37,31 @@ app.use(bodyparser.urlencoded({extended: true}));
 app.use(bodyparser.json());
 app.use("/", router);
 
+app.get("/video", (req, res) => {
+   var filePath = path?.join(__dirname, '../../../Downloads/videoplayback.mp4');
+   var stat = fs?.statSync(filePath);
+
+   console.log({stat});
+
+   console.log(req?.headers?.range);
+
+   res.writeHead(200, {
+      'Content-Type': 'video/mp4',
+      'Content-Length': stat.size
+   });
+
+   var readStream = fs?.createReadStream(filePath);
+   readStream.pipe(res);
+})
+
 export {app, server};
 
 function StartServer(): void {
    Mongo.Connect();
-   Logger.info(`TypeScript started on port ${port}!`);   
+   Logger.info(`TypeScript started on port ${port}!`);
+   // process?.exit();
 }
+
+process.on('unhandledRejection', () => {
+   Logger?.info("unhandledRejection");
+})
