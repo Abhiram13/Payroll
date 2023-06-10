@@ -17,11 +17,11 @@ import { RolesController } from "../controllers/roles.controller";
 export async function insertEmployee(req: Request, res: Response) {
    const body: IEmployeeSchema = req?.body;
    const controller = new EmployeeController();
-   const orgControler = new OrganisationController<{_id: ObjectId}>();
-   const org = await orgControler?.findById(body?.organisation_id, {_id: 1});
+   const orgControler = new OrganisationController();
+   const org = await orgControler?.findById(body?.organisation_id, {_id: 1}) as unknown as {_id: ObjectId};
    const manager = await controller?.findById(body?.manager_id);
    const roleController = new RolesController();
-   const identifier: {identifier: RoleIdentifier} | null = await roleController.findById(body?.role_id, {identifier: 1}, {name: 0, _id: 0});
+   // const identifier: {identifier: RoleIdentifier} | null = await roleController.findById(body?.role_id, {identifier: 1}, {name: 0, _id: 0});
 
    Logger.log(manager);
 
