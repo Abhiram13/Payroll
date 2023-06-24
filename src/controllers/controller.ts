@@ -16,7 +16,7 @@ export default class Controller<T extends Document> {
       this.aggregate = [];
    }
 
-   async insert(): Promise<StatusCodes> {
+   async insert(): Promise<StatusCodes.BAD_REQUEST | StatusCodes.OK | StatusCodes.NOT_MODIFIED> {
       try {
          const collection: Collection = DB.client.db(process.env.DB).collection(this.collection);
          const document = collection.insertOne(this.body);
@@ -44,6 +44,13 @@ export default class Controller<T extends Document> {
 
       return data;
    };
+
+   async find(filter: Filter<T>): Promise<T[]> {
+      const collection: Collection<T> = DB.client.db(process.env.DB).collection<T>(this.collection);
+      const data = await collection?.find(filter)?.toArray();
+
+      return data as T[];
+   }
 
    async findById(id: string, includeFields: Partial<IProjectFields<T & IMongo>> = {}, excludeFields: Partial<IProjectFields<T & IMongo>> = {}): Promise<T | null> {
       try {

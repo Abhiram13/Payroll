@@ -10,7 +10,7 @@ describe("Login API positive flow", () => {
    test("should get response with 200 status", async () => {
       const res = await request(app).post("/login").send({
          user_name: "abhi",
-         password: "123asdas"
+         password: "123"
       });
 
       if (res?.body?.status === 200) {

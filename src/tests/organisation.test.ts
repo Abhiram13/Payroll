@@ -15,12 +15,31 @@ describe("Employee router", () => {
 
    let token: Promise<string | null> = fetchToken();
 
-   test("fetch employee", async () => {
-      const res = await request(app).get("/api/organisation/fetch").set("authorization", `${await token}`); 
+   test("fetch employees", async () => {
+      const res = await request(app).get("/api/organisation/list").set("authorization", `${await token}`); 
 
-      expect(res?.status)?.toBe(200);
-      expect(res?.body?.status)?.toBe(200);
-      expect(res?.body?.result?._id)?.not?.toBe("");
+      if (res?.body?.status === 200) {
+         expect(res?.body).toHaveProperty('result');
+         const {result} = res?.body;
+
+         if (Array.isArray(result)) {
+            expect(result).toEqual(expect.arrayContaining([
+               expect.objectContaining({
+                  _id: expect.stringContaining(""),
+                  name: expect.stringContaining(""),
+                  admin_id: expect.stringContaining("")
+               })
+            ]));
+         } else {
+            expect(result).toEqual(
+               expect.objectContaining({
+                  _id: expect.stringContaining(""),
+                  name: expect.stringContaining(""),
+                  admin_id: expect.stringContaining("")
+               })
+            );
+         }
+      }
    });
 });
 

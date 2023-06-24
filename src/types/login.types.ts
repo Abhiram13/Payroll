@@ -46,8 +46,8 @@ export interface IMongo {
 
 export interface IEncryptedToken {
    id: ObjectId;
-   managerId: string;
-   organisationId: string;
+   managerId?: string;
+   organisationId?: string;
    roleId: string;
    roleIdentifier: RoleIdentifier;
    userName: string;

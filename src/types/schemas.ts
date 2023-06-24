@@ -21,10 +21,10 @@ export interface IEmployeeSchema {
     last_name: string;
     phone: number;
     email: string;
-    organisation_id: string;
+    organisation_id?: string;
     role_id: string;
     date_of_birth: Date;
-    manager_id: string;
+    manager_id?: string;
     username: string;
     password: string;
 }

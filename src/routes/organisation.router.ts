@@ -7,6 +7,6 @@ const orgRouter = express.Router();
 
 orgRouter.post("/add", (req, res, next) => authorization(req, res, next, [RoleIdentifier?.SuperAdmin]), OrgService.insertOrganisation);
 orgRouter.get("/employees", OrgService.listOfOrganisations);
-orgRouter.get("/fetch", OrgService.fetchOrganisation);
+orgRouter.get("/list", OrgService.fetchOrganisation);
 
 export default orgRouter;
