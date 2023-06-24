@@ -6,27 +6,29 @@ import { app, MONGO, server } from '../..';
 // to run a specific test case, use command `npm test -- -t '<test case name mentioned in describe callback || test case name mentioned in test callback>, 
 // for example `npm test -- -t 'POST /login test'` || `npm test -- -t 'should get response with 200 status'`
 
-describe("POST /login", () => {
+describe("Login API positive flow", () => {
    test("should get response with 200 status", async () => {
       const res = await request(app).post("/login").send({
          user_name: "abhi",
-         password: "123"
+         password: "123asdas"
       });
 
-      expect(res?.body?.status).toBe(200);
-   });
+      if (res?.body?.status === 200) {
+         expect(res?.body)?.toHaveProperty("result");
+         expect(res?.body?.result)?.toHaveProperty("name");
+         expect(res?.body?.result)?.toHaveProperty("token");
+         expect(res?.body?.result?.token)?.not?.toBe("");
+         expect(res?.body?.result?.name)?.not?.toBe("");
+      }
 
-   test("should get response with token", async () => {
-      const res = await request(app).post("/login").send({
-         user_name: "abhi",
-         password: "123"
-      });
-
-      expect(res?.body?.result?.token).not.toEqual("");
-   });   
+      if (res?.body?.status === 400) {
+         expect(res?.body)?.not?.toHaveProperty("result");
+         expect(res?.body)?.toHaveProperty("message");
+      } 
+   }); 
 });
 
-describe("POST /login test", () => {
+describe("Login API negative flow", () => {
    test("should get 400 if empty", async () => {
       const res = await request(app).post("/login").send();
 

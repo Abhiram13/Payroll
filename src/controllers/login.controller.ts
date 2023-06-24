@@ -16,12 +16,12 @@ export class LoginController {
 
    async #employeeList(): Promise<EmployeeWithMongo[] | null> {
       try {
-         const controller = new EmployeeController<IEmployeeSchema & IMongo>();
+         const controller = new EmployeeController();
          controller.aggregate = [
             { $match: { $and: [{ username: this.#payload?.user_name, password: this.#payload?.password }] } }
          ];
 
-         const list: EmployeeWithMongo[] = await controller?.list();
+         const list: EmployeeWithMongo[] = await controller?.list() as EmployeeWithMongo[];
          return list;
       } catch (e) {
          return null;
@@ -34,7 +34,7 @@ export class LoginController {
 
          if (list?.length) {
             let { _id, manager_id, organisation_id, role_id, username, first_name, last_name } = list[0];
-            const roleController = new RolesController<IRoleSchema & IMongo>();
+            const roleController = new RolesController();
 
             roleController.aggregate = [
                { $match: { _id: new ObjectId(role_id) } },

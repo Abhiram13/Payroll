@@ -1,6 +1,6 @@
 {
   "name": "payroll",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Payroll Application done in nodejs and mongoDB",
   "main": "index.js",
   "scripts": {
@@ -12,6 +12,7 @@
   "author": "Abhiram",
   "license": "ISC",
   "dependencies": {
+    "@types/cors": "^2.8.13",
     "body-parser": "^1.20.2",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",

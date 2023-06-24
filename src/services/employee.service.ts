@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { EmployeeController } from "../controllers/employee.controller";
-import { IEmployeeSchema, IOrganisationSchema, IRoleSchema, RoleIdentifier } from "../types/schemas";
+import { IEmployeeSchema, IRoleSchema, RoleIdentifier } from "../types/schemas";
 import { OrganisationController } from "../controllers/organisation.controller";
 import { ObjectId } from "mongodb";
-import { ApiReponse } from "./login.service";
+import { ApiReponse } from "./globals";
 import { StatusCodes } from "../types/login.types";
 import Logger from "./logger.service";
 import { RolesController } from "../controllers/roles.controller";
@@ -15,31 +15,41 @@ import { RolesController } from "../controllers/roles.controller";
  */
 
 export async function insertEmployee(req: Request, res: Response) {
-   const body: IEmployeeSchema = req?.body;
-   const controller = new EmployeeController<IEmployeeSchema>();      
-   const orgControler = new OrganisationController<{_id: ObjectId}>();
-   const org = await orgControler?.findById(body?.organisation_id, {_id: 1});
-   const manager = await controller?.findById(body?.manager_id);
-   const roleController = new RolesController<IRoleSchema>();
-   const identifier: {identifier: RoleIdentifier} | null = await roleController.findById(body?.role_id, {identifier: 1}, {name: 0, _id: 0});
+   try {
+      const body: IEmployeeSchema = req?.body;
+      // initiate employee controller
+      const controller = new EmployeeController();
+      // initiate organisation controller
+      const orgControler = new OrganisationController();
+      // initiate role controller
+      const roleControler = new RolesController();
 
-   Logger.log(manager);
+      // find if given organisation id is valid
+      const org = await orgControler?.findById(body?.organisation_id, { _id: 1 }) as unknown as { _id: ObjectId };
 
-   if (org?._id?.toString() !== body?.organisation_id) {
-      ApiReponse<null>(res, StatusCodes?.BAD_REQUEST, null, "Organisation does not exist with given value");
-      return;
+      if (org?._id?.toString() !== body?.organisation_id) {
+         ApiReponse<null>({ res, status: StatusCodes?.BAD_REQUEST, message: "Organisation does not exist with given value" });
+         return;
+      }
+
+      // fetch manager
+      const manager = await controller?.findById(body?.manager_id);
+
+      Logger.log(manager);
+
+      controller.body = body;
+
+      const message = await controller?.insert();
+      res.send(message).end();
+   } catch (e: any) {
+
    }
-   
-   controller.body = body;
-
-   const message = await controller?.insert();   
-   res.send(message).end();
 }
 
 export async function fetchEmployee(req: Request, res: Response) {
    const id: string = req?.params?.id;
-   const controller = new EmployeeController<IEmployeeSchema>();
-   const result = await controller?.findById(id, {first_name: 1, last_name: 1});
-   
+   const controller = new EmployeeController();
+   const result = await controller?.findById(id, { first_name: 1, last_name: 1 });
+
    res.send(result).end();
 }

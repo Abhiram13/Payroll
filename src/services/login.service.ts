@@ -1,7 +1,8 @@
-import express, { Request, Response } from "express";
+import { Request, Response } from "express";
 import { LoginController } from "../controllers/login.controller";
-import { StatusCodes, IApiResponse, ILoginResponse } from "../types/login.types";
+import { StatusCodes, ILoginResponse } from "../types/login.types";
 import Logger from "./logger.service";
+import { ApiReponse } from "./globals";
 
 export async function login(req: Request, res: Response) {
    try {
@@ -9,20 +10,21 @@ export async function login(req: Request, res: Response) {
       const data = await controller?.login();
       const status: StatusCodes = data?.token ? StatusCodes.OK : StatusCodes.BAD_REQUEST;
       const message: string | undefined = data ? undefined : "Invalid Credentials";
-
-      ApiReponse<ILoginResponse | null>(res, status, data, message);
+      // throw new Error('Test error');
+      ApiReponse<ILoginResponse | null>({
+         res, 
+         status: status,
+         result: data, 
+         message
+      });
    } catch (e: any) {
       Logger?.error(e?.message);
-      console.log('Error caught at: ', e);
-      ApiReponse<null>(res, StatusCodes?.UN_AUTHORISE, null, "Invalid Credentials", true);
+      ApiReponse<null>({
+         res, 
+         status: StatusCodes?.SERVER_ERROR, 
+         error: true,
+         message: "Invalid Credentials"
+      });
+      // throw new Error('Test error');
    }
-}
-
-export function ApiReponse<T>(res: Response, status: StatusCodes, result?: T, message?: string, error: boolean = false): void {
-   const response: IApiResponse<T> = { status, error };
-
-   if (result) response.result = result;
-   if (message) response.message = message;
-
-   res?.status(200).send(response)?.end();
 }

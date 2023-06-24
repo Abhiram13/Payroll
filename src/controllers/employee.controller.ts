@@ -1,12 +1,21 @@
-import express, { Request, Response } from "express";
-import { MONGO as DB } from "../../index";
-import { Collection, Document, ObjectId, Filter } from "mongodb";
 import { tables } from "../services/globals";
 import Controller from "./controller";
+import { IEmployeeSchema } from "../types/schemas";
 
-export class EmployeeController<T extends Document> extends Controller<T> {
+type RoleId = {role_id: string};
+
+export class EmployeeController extends Controller<IEmployeeSchema> {
    constructor() {
       super();
-      this.collection = tables?.employee;      
+      this.collection = tables?.employee;
+   }
+
+   async fetchEmployeeByAdminId(adminId: string): Promise<RoleId | null> {
+      try {
+         const result: RoleId | null = await this?.findById(adminId, {role_id: 1}, {_id: 0});
+         return result;
+      } catch (e: any) {
+         return null;
+      }
    }
 }
