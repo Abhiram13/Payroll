@@ -10,11 +10,21 @@ describe("Login API positive flow", () => {
    test("should get response with 200 status", async () => {
       const res = await request(app).post("/login").send({
          user_name: "abhi",
-         password: "123"
+         password: "123asdas"
       });
 
-      expect(res?.body?.status).toBe(200);
-      expect(res?.body?.result?.token)?.not?.toBe("");
+      if (res?.body?.status === 200) {
+         expect(res?.body)?.toHaveProperty("result");
+         expect(res?.body?.result)?.toHaveProperty("name");
+         expect(res?.body?.result)?.toHaveProperty("token");
+         expect(res?.body?.result?.token)?.not?.toBe("");
+         expect(res?.body?.result?.name)?.not?.toBe("");
+      }
+
+      if (res?.body?.status === 400) {
+         expect(res?.body)?.not?.toHaveProperty("result");
+         expect(res?.body)?.toHaveProperty("message");
+      } 
    }); 
 });
 

@@ -10,22 +10,21 @@ export async function login(req: Request, res: Response) {
       const data = await controller?.login();
       const status: StatusCodes = data?.token ? StatusCodes.OK : StatusCodes.BAD_REQUEST;
       const message: string | undefined = data ? undefined : "Invalid Credentials";
-      throw new Error('Test error');
-      // ApiReponse<ILoginResponse | null>({
-      //    res, 
-      //    status: status,
-      //    result: data, 
-      //    message
-      // });
+      // throw new Error('Test error');
+      ApiReponse<ILoginResponse | null>({
+         res, 
+         status: status,
+         result: data, 
+         message
+      });
    } catch (e: any) {
       Logger?.error(e?.message);
-      console.log('Error caught at: ', e);
-      // ApiReponse<null>({
-      //    res, 
-      //    status: StatusCodes?.SERVER_ERROR, 
-      //    error: true,
-      //    message: "Invalid Credentials"
-      // });
-      throw new Error('Test error');
+      ApiReponse<null>({
+         res, 
+         status: StatusCodes?.SERVER_ERROR, 
+         error: true,
+         message: "Invalid Credentials"
+      });
+      // throw new Error('Test error');
    }
 }
