@@ -6,9 +6,7 @@ import router from './src/routes/routes';
 import Logger from "./src/services/logger.service";
 import cors from 'cors';
 import path from 'path';
-import * as fs from 'fs';
-import cluster from 'cluster';
-import os from 'os';
+import {statSync, createReadStream} from 'fs';
 
 require('dotenv').config();
 
@@ -28,8 +26,8 @@ app.use(bodyparser.json());
 app.use("/", router);
 
 app.get("/video", (req, res) => {
-   var filePath = path?.join(__dirname, '../../../Downloads/videoplayback.mp4');
-   var stat = fs?.statSync(filePath);
+   const filePath = path?.join(__dirname, '../../../Downloads/videoplayback.mp4');
+   const stat = statSync(filePath);
 
    console.log(req?.headers?.range);
 
@@ -38,9 +36,9 @@ app.get("/video", (req, res) => {
       'Content-Length': stat.size
    });
 
-   var readStream = fs?.createReadStream(filePath);
+   const readStream = createReadStream(filePath);
    readStream.pipe(res);
-})
+});
 
 export { app, server };
 
@@ -49,45 +47,12 @@ function StartServer(): void {
    Logger.info(`TypeScript started on port ${port}!`);
 }
 
-// const formatMemoryUsage = (data: number) => `${Math.round(data / 1024 / 1024 * 100) / 100} MB`;
-// const memoryData = process?.memoryUsage();
-
-// const memoryUsage = {
-//    rss: `${formatMemoryUsage(memoryData.rss)} -> Resident Set Size - total memory allocated for the process execution`,
-//    heapTotal: `${formatMemoryUsage(memoryData.heapTotal)} -> total size of the allocated heap`,
-//    heapUsed: `${formatMemoryUsage(memoryData.heapUsed)} -> actual memory used during the execution`,
-//    external: `${formatMemoryUsage(memoryData.external)} -> V8 external memory`,
-//    array: `${formatMemoryUsage(memoryData.arrayBuffers)} -> Array buffers memory`,
-// };
-
 if (process?.env?.NODE_ENV !== 'test') {
    server = app.listen(port, StartServer);
 
    // if API response not sent during this time, server will throw timeout error
    server.timeout = 20 * seconds;
 };
-
-// if (cluster?.isPrimary) {
-//    const cpus = os?.cpus()?.length;
-
-//    Logger.log({cpus});
-
-//    for (var i = 0; i < cpus; i++) {
-//       cluster?.fork();
-//    }
-
-//    cluster?.on('exit', (w, c, s) => {
-//       console.log(`worker ${w?.process?.pid} is DEAD!!!! 💀`);
-//    });
-// } else {
-//    Logger?.info(`Process started with Id: ${process?.pid}`);
-//    if (process?.env?.NODE_ENV !== 'test') {
-//       server = app.listen(port, StartServer);
-
-//       // if API response not sent during this time, server will throw timeout error
-//       server.timeout = 20 * seconds;
-//    };
-// };
 
 process.on('unhandledRejection', () => {
    Logger?.info("unhandledRejection");
