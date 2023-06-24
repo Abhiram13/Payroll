@@ -1,69 +1,69 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
-# More GitHub Actions for Azure: https://github.com/Azure/actions
+# # Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js app to Azure Web App - abh-payroll
+# name: Build and deploy Node.js app to Azure Web App - abh-payroll
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
+# on:
+#   push:
+#     branches:
+#       - main
+#   workflow_dispatch:
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v2
-      - name: create env file
-        run: |
-          touch .env
-          echo DB=${{ vars.DB }} >> .env
-          echo HOST=${{ vars.HOST }} >> .env
-          echo PASSWORD=${{ vars.PASSWORD }} >> .env
-          echo USERNAME=${{ vars.USERNAME }} >> .env
-          echo EMPLOYEE=${{ vars.EMPLOYEE }} >> .env
-          echo SECRET_KEY=${{ vars.SECRET_KEY }} >> .env
-          echo CHECKINS=${{ vars.CHECKINS }} >> .env
-          echo LEAVES=${{ vars.LEAVES }} >> .env
-          echo ORGANISATION=${{ vars.ORGANISATION }} >> .env
-          echo ROLES=${{ vars.ROLES }} >> .env
-      - name: Set up Node.js version
-        uses: actions/setup-node@v1
-        with:
-          node-version: '18.x'
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: create env file
+#         run: |
+#           touch .env
+#           echo DB=${{ vars.DB }} >> .env
+#           echo HOST=${{ vars.HOST }} >> .env
+#           echo PASSWORD=${{ vars.PASSWORD }} >> .env
+#           echo USERNAME=${{ vars.USERNAME }} >> .env
+#           echo EMPLOYEE=${{ vars.EMPLOYEE }} >> .env
+#           echo SECRET_KEY=${{ vars.SECRET_KEY }} >> .env
+#           echo CHECKINS=${{ vars.CHECKINS }} >> .env
+#           echo LEAVES=${{ vars.LEAVES }} >> .env
+#           echo ORGANISATION=${{ vars.ORGANISATION }} >> .env
+#           echo ROLES=${{ vars.ROLES }} >> .env
+#       - name: Set up Node.js version
+#         uses: actions/setup-node@v1
+#         with:
+#           node-version: '18.x'
 
-      - name: Install dependencies
-        run: npm install
-      - name: Build project
-        run: npm run build --if-present
-      - name: Start testing
-        run: npm test
+#       - name: Install dependencies
+#         run: npm install
+#       - name: Build project
+#         run: npm run build --if-present
+#       - name: Start testing
+#         run: npm test
 
-      - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v2
-        with:
-          name: node-app
-          path: .
+#       - name: Upload artifact for deployment job
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: node-app
+#           path: .
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build
-    environment:
-      name: 'production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
+#   deploy:
+#     runs-on: ubuntu-latest
+#     needs: build
+#     environment:
+#       name: 'production'
+#       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
-    steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v2
-        with:
-          name: node-app
+#     steps:
+#       - name: Download artifact from build job
+#         uses: actions/download-artifact@v2
+#         with:
+#           name: node-app
 
-      - name: 'Deploy to Azure Web App'
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: 'abh-payroll'
-          slot-name: 'production'
-          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
-          package: .
+#       - name: 'Deploy to Azure Web App'
+#         id: deploy-to-webapp
+#         uses: azure/webapps-deploy@v2
+#         with:
+#           app-name: 'abh-payroll'
+#           slot-name: 'production'
+#           publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+#           package: .
