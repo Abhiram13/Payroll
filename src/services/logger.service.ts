@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import path from 'path';
 
-const dir = path?.join(__dirname, '..', "..");
+const dir: string = path?.join(__dirname, '..', "..");
 const folderWithPath: string = `${dir}/.logs`;
 const fileName: string = fileNameWithDate();
 

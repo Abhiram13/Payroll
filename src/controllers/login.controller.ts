@@ -1,12 +1,10 @@
-import {ILoginRequest, ILoginResponse, ILoginRoleIdentifier, IMongo, IEncryptedToken} from "../types/login.types";
+import {ILoginRequest, ILoginResponse, IRoleIdentifier, IMongo, IEncryptedToken} from "../types/login.types";
 import { EmployeeController } from "./employee.controller";
-import { IEmployeeSchema, IRoleSchema, RoleIdentifier } from "../types/schemas";
+import { IEmployeeSchema, RoleIdentifier } from "../types/schemas";
 import Hashing from "../services/hashing";
 import { RolesController } from "./roles.controller";
-import { ObjectId } from "mongodb";
 
 type EmployeeWithMongo = (IEmployeeSchema & IMongo);
-type IdentifierValue = {identifier: number};
 
 export class LoginController {
    #payload: ILoginRequest;
@@ -41,7 +39,7 @@ export class LoginController {
          if (list?.length) {
             const { _id: employee_id, manager_id, organisation_id, role_id, username, first_name, last_name } = list[0];
             const roleController = new RolesController();
-            const result: IdentifierValue | null = await roleController?.findById(role_id, {identifier: 1}, {_id: 0, name: 0});
+            const result: IRoleIdentifier | null = await roleController?.findById(role_id, {identifier: 1}, {_id: 0, name: 0});
             const identifier: RoleIdentifier | null = result?.identifier || null;
 
             if (!identifier) {

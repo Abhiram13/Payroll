@@ -29,15 +29,11 @@ export interface IApiResponse<T> {
    status: StatusCodes;
    result?: T;
    message?: string;
-   error: boolean;
+   error?: boolean;
 }
 
-export interface IApiResponsePayload<T> {
+export interface IApiResponsePayload<T> extends IApiResponse<T> {
    res: Response;
-   status: StatusCodes;
-   result?: T;
-   message?: string;
-   error?: boolean;
 }
 
 export interface IMongo {
@@ -54,12 +50,6 @@ export interface IEncryptedToken {
    time: number;
 }
 
-export interface ILoginRoleIdentifier {
+export interface IRoleIdentifier {
    identifier: RoleIdentifier;
-}
-
-export interface ICallbackResult<T> {
-   status: StatusCodes;
-   result?: T;
-   message?: string;
 }
