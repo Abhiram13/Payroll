@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
 import { LoginController } from "../controllers/login.controller";
 import { StatusCodes, ILoginResponse } from "../types/login.types";
 import Logger from "./logger.service";
 import { ApiReponse } from "./globals";
+import { Request, Response } from "./server";
 
 export async function login(req: Request, res: Response) {
    try {

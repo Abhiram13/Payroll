@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { RoleIdentifier } from "./schemas";
-import { Response } from "express";
+import { Response } from "../services/server";
 
 export interface ILoginRequest {
    user_name: string;

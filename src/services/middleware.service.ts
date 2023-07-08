@@ -1,12 +1,12 @@
-import {NextFunction, Request, Response} from "express";
 import Hashing from "./hashing";
 import { IEncryptedToken, StatusCodes } from "../types/login.types";
 import { EmployeeController } from "../controllers/employee.controller";
 import { IEmployeeSchema, RoleIdentifier } from "../types/schemas";
 import Logger from "./logger.service";
 import { ApiReponse } from "./globals";
+import { Request, Response } from "./server";
 
-export async function authentication(req: Request, res: Response, next: NextFunction) {
+export async function authentication(req: Request, res: Response) {
    const token: string | undefined = req?.headers['authorization'];
 
    try {
@@ -24,9 +24,8 @@ export async function authentication(req: Request, res: Response, next: NextFunc
          const empController = new EmployeeController();
          const employee = await empController.findById(decrypted?.id?.toString());
    
-         if (employee && employee?.username) {
-            res.locals.payload = decrypted;
-            next();
+         if (employee && employee?.username) {            
+            res.locals.payload = decrypted;            
             return;
          }
    
@@ -43,7 +42,7 @@ export async function authentication(req: Request, res: Response, next: NextFunc
    }   
 }
 
-export async function authorization(req: Request, res: Response, next: NextFunction, roles: RoleIdentifier[]) {
+export async function authorization(req: Request, res: Response, roles: RoleIdentifier[]) {
    try {
       const payload: IEncryptedToken = res?.locals?.payload;
 
@@ -52,7 +51,6 @@ export async function authorization(req: Request, res: Response, next: NextFunct
          return;
       }
 
-      next();
       return;
    } catch (e: any) {
       ApiReponse<null>({ res, status: StatusCodes?.UN_AUTHORISE, message: e?.message });

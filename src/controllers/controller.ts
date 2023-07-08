@@ -1,4 +1,3 @@
-import express, { Request, Response } from "express";
 import { MONGO as DB } from "../../index";
 import { Collection, Document, Filter, UpdateFilter } from "mongodb";
 import {ObjectId} from "bson";

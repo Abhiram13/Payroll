@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response } from "../services/server";
 import { OrganisationController } from "../controllers/organisation.controller";
 import { IOrganisationSchema, IEmployeeSchema, IRoleSchema, RoleIdentifier } from "../types/schemas";
 import { IEncryptedToken, StatusCodes } from "../types/login.types";

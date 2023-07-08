@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response } from "../services/server";
 import { EmployeeController } from "../controllers/employee.controller";
 import { IEmployeeSchema, IRoleSchema, RoleIdentifier } from "../types/schemas";
 import { OrganisationController } from "../controllers/organisation.controller";
@@ -68,6 +68,7 @@ export async function fetchEmployee(req: Request, res: Response) {
    const id: string = req?.params?.id;
    const controller = new EmployeeController();
    const result = await controller?.findById(id, { first_name: 1, last_name: 1 });
-
-   res.send(result).end();
+   
+   res?.write(result);
+   res?.end();
 }

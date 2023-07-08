@@ -1,4 +1,4 @@
-import { NextFunction, Response, Request } from "express";
+import { Response } from "./server";
 import { IApiResponse, IApiResponsePayload } from "../types/login.types"
 import { StatusCodes } from "../types/login.types";
 import { IEmployeeSchema } from "../types/schemas"
@@ -20,7 +20,11 @@ export function ApiReponse<T>(payload: IApiResponsePayload<T>): void {
     if (result) response.result = result;
     if (message) response.message = message;
 
-    res?.status(status).send(response)?.end();
+    const stringifiedResponse: string = JSON.stringify(response);
+
+    res.statusCode = status;
+    res.write(stringifiedResponse);
+    res.end();
 }
 
 /**
