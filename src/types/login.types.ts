@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { RoleIdentifier } from "./schemas";
-import { Response } from "express";
+import { Response } from "../services/server";
 
 export interface ILoginRequest {
    user_name: string;
@@ -29,15 +29,11 @@ export interface IApiResponse<T> {
    status: StatusCodes;
    result?: T;
    message?: string;
-   error: boolean;
+   error?: boolean;
 }
 
-export interface IApiResponsePayload<T> {
+export interface IApiResponsePayload<T> extends IApiResponse<T> {
    res: Response;
-   status: StatusCodes;
-   result?: T;
-   message?: string;
-   error?: boolean;
 }
 
 export interface IMongo {
@@ -46,20 +42,14 @@ export interface IMongo {
 
 export interface IEncryptedToken {
    id: ObjectId;
-   managerId: string;
-   organisationId: string;
+   managerId?: string;
+   organisationId?: string;
    roleId: string;
    roleIdentifier: RoleIdentifier;
    userName: string;
    time: number;
 }
 
-export interface ILoginRoleIdentifier {
+export interface IRoleIdentifier {
    identifier: RoleIdentifier;
-}
-
-export interface ICallbackResult<T> {
-   status: StatusCodes;
-   result?: T;
-   message?: string;
 }

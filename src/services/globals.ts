@@ -1,6 +1,6 @@
-import { NextFunction, Response, Request } from "express";
+import { Response } from "./server";
 import { IApiResponse, IApiResponsePayload } from "../types/login.types"
-import { ICallbackResult, StatusCodes } from "../types/login.types";
+import { StatusCodes } from "../types/login.types";
 import { IEmployeeSchema } from "../types/schemas"
 
 require('dotenv').config();
@@ -20,13 +20,17 @@ export function ApiReponse<T>(payload: IApiResponsePayload<T>): void {
     if (result) response.result = result;
     if (message) response.message = message;
 
-    res?.status(status).send(response)?.end();
+    const stringifiedResponse: string = JSON.stringify(response);
+
+    res.statusCode = status;
+    res.write(stringifiedResponse);
+    res.end();
 }
 
 /**
  * Trigger `setTimeout` with `3` second time limit, if API takes longer than 3 seconds, return `504` timeout error
  */
-export async function TimerMethod<T>(res: Response, callback: () => Promise<ICallbackResult<T>>): Promise<void> {
+export async function TimerMethod<T>(res: Response, callback: () => Promise<any>): Promise<void> {
     var isTimedOut: boolean = false;
     const RESPONSE_TIMER = 3000; // 3000 milliseconds = 3 seconds
 

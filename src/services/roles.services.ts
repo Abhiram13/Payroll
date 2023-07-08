@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response } from "../services/server";
 import { RolesController } from "../controllers/roles.controller";
 import { IRoleSchema, RoleIdentifier } from "../types/schemas";
 import { StatusCodes } from "../types/login.types";

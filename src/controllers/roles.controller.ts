@@ -1,7 +1,7 @@
 import { tables } from "../services/globals";
 import Controller from "./controller";
 import { IRoleSchema } from "../types/schemas";
-import { RoleIdentifier } from "../types/schemas";
+import { IRoleIdentifier } from "../types/login.types";
 
 export class RolesController extends Controller<IRoleSchema> {
    constructor() {
@@ -9,9 +9,9 @@ export class RolesController extends Controller<IRoleSchema> {
       this.collection = tables?.roles;      
    }
 
-   async fetchRoleIdentifierByEmpRoleId(roleId: string): Promise<{identifier: RoleIdentifier} | null> {
+   async fetchRoleIdentifierByEmpRoleId(roleId: string): Promise<IRoleIdentifier | null> {
       try {
-         const res: {identifier: RoleIdentifier} | null = await this.findById(roleId, {identifier: 1}, {_id: 0});
+         const res: IRoleIdentifier | null = await this.findById(roleId, {identifier: 1}, {_id: 0});
          return res;
       } catch(e: any) {
          return null;
