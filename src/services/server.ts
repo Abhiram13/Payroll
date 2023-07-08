@@ -208,6 +208,10 @@ export class Server {
          }               
       });
    };
+
+   close() {
+      this.#httpServer.close();
+   }
 }
 
 export const server = new Server();

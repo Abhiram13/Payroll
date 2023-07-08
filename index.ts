@@ -18,3 +18,5 @@ if (process?.env?.NODE_ENV !== 'test') {
 
    server.use({path: '', router: router});   
 };
+
+export {server};
