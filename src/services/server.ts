@@ -17,88 +17,7 @@ interface IRoutingHandlers {
    handler: Middleware[];
 };
 
-// interface IServer extends IRouter {
-//    listen: (port: number, server: () => void) => void;
-// }
-
-// interface IRouter {
-//    get: (url: string, ...middlewares: Middleware[]) => void;
-//    post: (url: string, ...middlewares: Middleware[]) => void;
-//    handlers?: IRoutingHandlers[] | undefined;
-//    use: (params: IRouterMiddleWare) => void;
-// }
-
-// const MyServer: http.Server = new http.Server();
 const handlers: IRoutingHandlers[] = [];
-
-// function getMethod(url: string, ...middlewares: Middleware[]) {
-//    handlers?.push({
-//       url: url,
-//       method: 'GET',
-//       handler: middlewares,
-//    });
-// };
-
-// function postMethod(url: string, ...middlewares: Middleware[]) {
-//    handlers?.push({
-//       url: url,
-//       method: 'POST',
-//       handler: middlewares,
-//    });
-// };
-
-// function listenMethod(port: number = 3000, callback: () => void) {
-//    const seconds = 1000;
-   
-//    // if API response not sent during this time, server will throw timeout error
-//    MyServer.timeout = 20 * seconds;
-//    MyServer.listen(port, callback);   
-//    MyServer.on('request', (req: Request, res: Response) => {
-//       let request = req;
-//       let response = res;
-
-//       const url: string | undefined = request?.url;
-//       const method: Methods | undefined = request?.method as Methods;
-//       const api: IRoutingHandlers | undefined = handlers?.filter(h => h?.url === url && h?.method === method)[0];
-
-//       response.setHeader('Content-Type', 'application/json'); // setting it by default
-
-//       if (!api) {
-//          response.statusCode = 404;
-//          response?.write('Route not found/ does not exist');
-//          response?.end();
-//          return;
-//       }
-
-//       const middlewaresInitiation = () => {
-//          for (var i = 0; i < api?.handler?.length; i++) {
-//             api.handler[i]?.(request, response);
-//             const isResponseEnded: boolean = response?.writableEnded;
-
-//             if (isResponseEnded) break;
-//          };
-//       };
-
-//       if (method === 'POST') { // this is for both POST and PUT
-//          request.on('data', (chunk: Buffer) => {
-//             request.body = chunk.toString();
-//             middlewaresInitiation(); // calling here again because this function is getting called even before 'data' event is triggered
-//          });
-//       } else {
-//          middlewaresInitiation();
-//       }               
-//    });
-// };
-
-// function useMethod({path, middlewares = [], router}: IRouterMiddleWare) {
-//    router.routeHandlers.map(({handler, url, method}) => {
-//       handlers?.push({
-//          handler: [...middlewares, ...handler],
-//          url: path + url,
-//          method,
-//       })
-//    });
-// }
 
 export class Router {
    routeHandlers: IRoutingHandlers[] = [];
@@ -125,13 +44,6 @@ export class Router {
       });
    };
 }
-
-// export const server: IServer = {
-//    get: getMethod,
-//    post: postMethod,
-//    listen: listenMethod,
-//    use: useMethod,
-// }
 
 export class Server {
    #httpServer: http.Server = new  http.Server();
