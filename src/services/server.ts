@@ -1,4 +1,5 @@
 import * as http from 'http';
+import { StatusCodes } from '../types/login.types';
 
 export type Request = http.IncomingMessage & {body: any, params: any};
 export type Response = http.ServerResponse & {locals: any};
@@ -45,7 +46,7 @@ export class Router {
    };
 }
 
-export class Server {
+class Server {
    #httpServer: http.Server = new  http.Server();
 
    get(url: string, ...middlewares: Middleware[]) {
@@ -108,12 +109,23 @@ export class Server {
             };
          };
    
-         if (method === 'POST') { // this is for both POST and PUT
+         if (method === 'POST') { // this is for both POST and PUT             
             request.on('data', (chunk: Buffer) => {
                const data = chunk?.toString();
                const json = JSON.parse(data);
-               request.body = json;
-               middlewaresInitiation(); // calling here again because this function is getting called even before 'data' event is triggered
+               request.body = json;               
+            }).on('end', () => {
+               if (!request?.body) {
+                  response.statusCode = StatusCodes.BAD_REQUEST;
+                  response.write(JSON.stringify({
+                     status: 500,
+                     error: false,
+                     message: "Invalid/ Empty payload"
+                  }));
+                  response.end();
+               } else {
+                  middlewaresInitiation(); // calling here again because this function is getting called even before 'data' event is triggered
+               }
             });
          } else {
             middlewaresInitiation();
