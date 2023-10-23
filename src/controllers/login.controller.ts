@@ -11,6 +11,8 @@ export class LoginController {
 
    constructor (payload: ILoginRequest) {
       this.#payload = payload;
+
+      if (!payload?.user_name || !payload?.password) throw new Error('Invalid login payload provided');
    }
 
    /**
@@ -19,17 +21,13 @@ export class LoginController {
     * @returns null if Employee does not exists
     */
    async #employeeList(): Promise<EmployeeWithMongo[] | null> {
-      try {
-         const controller = new EmployeeController();
-         controller.aggregate = [
-            { $match: { $and: [{ username: this.#payload?.user_name, password: this.#payload?.password }] } }
-         ];
+      const controller = new EmployeeController();
+      controller.aggregate = [
+         { $match: { $and: [{ username: this.#payload?.user_name, password: this.#payload?.password }] } }
+      ];
 
-         const list: EmployeeWithMongo[] = await controller?.list() as EmployeeWithMongo[];
-         return list;
-      } catch (e) {
-         return null;
-      }
+      const list: EmployeeWithMongo[] = await controller?.list() as EmployeeWithMongo[];
+      return list?.length ? list : null;
    }
 
    async login(): Promise<ILoginResponse | null> {
