@@ -1,0 +1,15 @@
+# version: '1.0'
+
+# services:
+#   api:
+#     build: .
+
+#   nginx:
+#     image: nginx:latest
+#     volumes:
+#       - ./conf.d:/etc/nginx/conf.d
+#     depends_on:
+#       - api
+#     ports:
+#       - 3000:3000
+
