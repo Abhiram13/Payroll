@@ -8,8 +8,6 @@ export class Mongo {
       try {
          await Mongo.client.connect();
          Mongo.client.db(process.env.DB);
-      } catch (e: any) {
-         console.error(e?.message);
-      }
+      } catch (e: any) { }
    }
 }

@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises';
 import path from 'path';
 
-const dir = path?.join(__dirname, '..', "..");
+const dir: string = path?.join(__dirname, '..', "..");
 const folderWithPath: string = `${dir}/.logs`;
 const fileName: string = fileNameWithDate();
 
@@ -43,21 +43,21 @@ export default class Logger {
 
    static info(...arg: any): void {
       console.log(`[${Logger.#blue}]`, 'INFO', ...arg);
-      appendFile(arg, 'INFO');
+      // appendFile(arg, 'INFO');
    }
 
    static error(...arg: any): void {
       console.log(`[${Logger.#red}]`, 'ERROR', ...arg);
-      appendFile(arg, 'ERROR');
+      // appendFile(arg, 'ERROR');
    }
 
    static warn(...arg: any): void {
       console.log(`[${Logger.#yellow}]`, 'WARN', ...arg);
-      appendFile(arg, 'WARN');
+      // appendFile(arg, 'WARN');
    }
 
    static log(...arg: any): void {
       console.log(`[${Logger.#white}]`, 'LOG', ...arg);
-      appendFile(arg, 'LOG');
+      // appendFile(arg, 'LOG');
    }
 }

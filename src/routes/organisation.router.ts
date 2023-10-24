@@ -1,12 +1,12 @@
-import express from "express";
 import * as OrgService from "../services/organisation.service";
 import { authorization } from "../services/middleware.service";
 import { RoleIdentifier } from "../types/schemas";
+import { Router } from "../services/server";
 
-const orgRouter = express.Router();
+const orgRouter = new Router();
 
-orgRouter.post("/add", (req, res, next) => authorization(req, res, next, [RoleIdentifier?.SuperAdmin]), OrgService.insertOrganisation);
+orgRouter.post('/add', (req, res) => authorization(req, res, [RoleIdentifier?.SuperAdmin]), OrgService.insertOrganisation);
 orgRouter.get("/employees", OrgService.listOfOrganisations);
-orgRouter.get("/fetch", OrgService.fetchOrganisation);
+orgRouter.get("/list", OrgService.fetchOrganisation);
 
 export default orgRouter;

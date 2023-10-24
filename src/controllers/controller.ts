@@ -1,4 +1,3 @@
-import express, { Request, Response } from "express";
 import { MONGO as DB } from "../../index";
 import { Collection, Document, Filter, UpdateFilter } from "mongodb";
 import {ObjectId} from "bson";
@@ -16,13 +15,17 @@ export default class Controller<T extends Document> {
       this.aggregate = [];
    }
 
-   async insert(): Promise<StatusCodes> {
-      const collection: Collection = DB.client.db(process.env.DB).collection(this.collection);
-      const document = collection.insertOne(this.body);
-      const { acknowledged } = await document;
-      const status: StatusCodes = acknowledged ? StatusCodes?.OK : StatusCodes?.NOT_MODIFIED
+   async insert(): Promise<StatusCodes.BAD_REQUEST | StatusCodes.OK | StatusCodes.NOT_MODIFIED> {
+      try {
+         const collection: Collection = DB.client.db(process.env.DB).collection(this.collection);
+         const document = collection.insertOne(this.body);
+         const { acknowledged } = await document;
+         const status: StatusCodes = acknowledged ? StatusCodes?.OK : StatusCodes?.NOT_MODIFIED
 
-      return status;
+         return status;
+      } catch(e) {
+         return StatusCodes?.BAD_REQUEST;
+      }
    };
 
    async update(filter: Filter<Document> = {}, set: UpdateFilter<T>): Promise<StatusCodes> {
@@ -40,6 +43,13 @@ export default class Controller<T extends Document> {
 
       return data;
    };
+
+   async find(filter: Filter<T>): Promise<T[]> {
+      const collection: Collection<T> = DB.client.db(process.env.DB).collection<T>(this.collection);
+      const data = await collection?.find(filter)?.toArray();
+
+      return data as T[];
+   }
 
    async findById(id: string, includeFields: Partial<IProjectFields<T & IMongo>> = {}, excludeFields: Partial<IProjectFields<T & IMongo>> = {}): Promise<T | null> {
       try {
