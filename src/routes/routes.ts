@@ -9,8 +9,6 @@ const router = new Router();
 router.use({path: '/api', middlewares: [authentication], router: apiRouter});
 router.get('/', (req, res) => {
    console.log(req.socket.localPort);
-   console.log(req.socket.remotePort);
-   console.log(process.pid);
    res?.write(`Hi There this is from HOSTNAME: ${os?.hostname()} PORT: ${process?.env?.PORT}`);
    res?.end();
 });
