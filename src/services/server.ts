@@ -47,7 +47,7 @@ export class Router {
 }
 
 class Server {
-   #httpServer: http.Server = new  http.Server();
+   #httpServer: http.Server = new http.Server();
 
    get(url: string, ...middlewares: Middleware[]) {
       handlers?.push({
@@ -108,25 +108,33 @@ class Server {
                if (isResponseEnded) break;
             };
          };
-   
-         if (method === 'POST') { // this is for both POST and PUT             
-            request.on('data', (chunk: Buffer) => {
-               const data = chunk?.toString();
+
+         const onData = (chunk: Buffer): void => {
+            try {
+               const data = chunk?.toString();            
                const json = JSON.parse(data);
-               request.body = json;               
-            }).on('end', () => {
-               if (!request?.body) {
-                  response.statusCode = StatusCodes.BAD_REQUEST;
-                  response.write(JSON.stringify({
-                     status: 500,
-                     error: false,
-                     message: "Invalid/ Empty payload"
-                  }));
-                  response.end();
-               } else {
-                  middlewaresInitiation(); // calling here again because this function is getting called even before 'data' event is triggered
-               }
-            });
+               request.body = json;
+            } catch (e) {
+               request.body = null;
+            }
+         };
+
+         const onEnd = (): void => {
+            if (!request?.body) {
+               response.statusCode = StatusCodes.BAD_REQUEST;
+               response.write(JSON.stringify({
+                  status: 500,
+                  error: false,
+                  message: "Invalid/ Empty payload"
+               }));
+               response.end();
+            } else {
+               middlewaresInitiation(); // calling here again because this function is getting called even before 'data' event is triggered
+            }
+         }
+   
+         if (method === 'POST') { // this is for both POST and PUT
+            request.on('data', onData).on('end', onEnd);
          } else {
             middlewaresInitiation();
          }               
