@@ -1,10 +1,16 @@
+import * as https from 'https';
 import * as http from 'http';
+import * as fs from 'fs';
+import * as path from 'path';
 import { StatusCodes } from '../types/login.types';
 
 export type Request = http.IncomingMessage & {body: any, params: any};
 export type Response = http.ServerResponse & {locals: any};
 type Middleware = (request: Request, response: Response) => void;
 export type Methods = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
+const key = path.resolve(__dirname, '../../', './client-key.pem');
+const cert = path.resolve(__dirname, '../../', './client-cert.pem');
 
 interface IRouterMiddleWare {
    path: string;
@@ -47,7 +53,10 @@ export class Router {
 }
 
 class Server {
-   #httpServer: http.Server = new http.Server();
+   #httpServer: https.Server = new https.Server({
+      key: fs.readFileSync(key, 'utf-8'),
+      cert: fs.readFileSync(cert, 'utf-8'),
+   });   
 
    get(url: string, ...middlewares: Middleware[]) {
       handlers?.push({
@@ -77,7 +86,7 @@ class Server {
 
    listen(port: number = 3000, callback: () => void) {
       const seconds = 1000;
-      
+
       // if API response not sent during this time, server will throw timeout error
       this.#httpServer.timeout = 20 * seconds;
       this.#httpServer.listen(port, callback);   
