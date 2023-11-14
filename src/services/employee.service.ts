@@ -9,7 +9,7 @@ import Logger from "./logger.service";
 import { RolesController } from "../controllers/roles.controller";
 
 /**
- * Ony used to add Organisation admin
+ * Only used to add Organisation admin
  */
 export async function insertEmployee(req: Request, res: Response) {
    try {
@@ -37,7 +37,7 @@ export async function insertEmployee(req: Request, res: Response) {
 
       const roleIdentifier = await roleControler?.fetchRoleIdentifierByEmpRoleId(body?.role_id);
 
-      // find if the employee is SuperAdmin or Organisation Admin
+      // find if the employee is Organisation Admin
       if (roleIdentifier?.identifier !== RoleIdentifier?.OrganisationAdmin) {
          ApiReponse<null>({ res, status: StatusCodes?.BAD_REQUEST, message: "role_id is invalid. Role should be organisation admin" });
          return;
