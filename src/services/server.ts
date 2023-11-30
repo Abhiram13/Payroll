@@ -53,10 +53,12 @@ export class Router {
 }
 
 class Server {
-   #httpServer: https.Server = new https.Server({
+   // RUN COMMAND TO START NODE SERVER ==> npm run node SSL=true || SSL=true npm run node
+
+   #httpServer: http.Server | https.Server = process.env.SSL !== 'true' ? new http.Server() : new https.Server({
       key: fs.readFileSync(key, 'utf-8'),
       cert: fs.readFileSync(cert, 'utf-8'),
-   });   
+   });
 
    get(url: string, ...middlewares: Middleware[]) {
       handlers?.push({
