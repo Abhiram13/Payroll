@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npm install & tsc",
-    "node": "ts-node-dev --respawn --transpile-only index.ts $SSL",
+    "node": "ts-node-dev --respawn --transpile-only ./index.ts $SSL $PORT",
     "start": "tsc & node build/index.js",
     "test": "jest"
   },
