@@ -40,6 +40,17 @@ export interface IMongo {
    _id: ObjectId;
 }
 
+/**
+ * ```typescript
+ * id: ObjectId;
+   managerId?: string;
+   organisationId?: string;
+   roleId: string;
+   roleIdentifier: RoleIdentifier;
+   userName: string;
+   time: number;
+ * ```
+ */
 export interface IEncryptedToken {
    id: ObjectId;
    managerId?: string;
