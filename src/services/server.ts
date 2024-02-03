@@ -5,7 +5,7 @@ import * as path from 'path';
 import { StatusCodes } from '../types/login.types';
 
 export type Request = http.IncomingMessage & {body: any, params: any};
-export type Response = http.ServerResponse & {locals: any};
+export type Response = MyResponse & {locals: any};
 type Middleware = (request: Request, response: Response) => void;
 export type Methods = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -25,6 +25,33 @@ interface IRoutingHandlers {
 };
 
 const handlers: IRoutingHandlers[] = [];
+
+class MyResponse<Request extends http.IncomingMessage = http.IncomingMessage> extends http.ServerResponse<Request> {
+   #content_type: string = "application/json";
+
+   locals = {};
+
+   #parsing(stringifiedBody: any) {
+      try {
+         let check = JSON.parse(stringifiedBody);
+      } catch (e) {
+         
+      }
+   }
+
+   json(body: any): void {
+      try {
+         const stringifiedBody: string = typeof body !== 'string' ? JSON.stringify(body) : body;         
+         this.setHeader('Content-Type', this.#content_type);
+         this.write(stringifiedBody);
+         this.end();
+      } catch (e) {
+         this.statusCode = StatusCodes.SERVER_ERROR;
+         this.write(`{ "statusCode": ${StatusCodes.SERVER_ERROR}, "message": "Some internal error at parsing given response" }`);
+         this.end();
+      }    
+   }
+}
 
 export class Router {
    routeHandlers: IRoutingHandlers[] = [];
@@ -55,7 +82,7 @@ export class Router {
 class Server {
    // RUN COMMAND TO START NODE SERVER ==> npm run node SSL=true || SSL=true npm run node
 
-   #httpServer: http.Server | https.Server = process.env.SSL !== 'true' ? new http.Server() : new https.Server({
+   #httpServer: http.Server | https.Server = process.env.SSL !== 'true' ? new http.Server({ServerResponse: MyResponse}) : new https.Server({
       key: fs.readFileSync(key, 'utf-8'),
       cert: fs.readFileSync(cert, 'utf-8'),
    });
@@ -86,6 +113,22 @@ class Server {
       });
    };
 
+   address() {
+      return this.#httpServer.address();
+   }
+
+   close() {
+      this.#httpServer.close();
+   }
+
+   // #onRequest(req: Request, res: Response) {
+   //    const request = req;
+   //    const response = res;
+   //    const url: string | undefined = request?.url;
+   //    const method: Methods | undefined = request?.method as Methods;
+   //    const api: IRoutingHandlers | undefined = handlers?.filter(h => h?.url === url && h?.method === method)[0];
+   // }
+
    listen(port: number = 3000, callback: () => void) {
       const seconds = 1000;
 
@@ -106,10 +149,11 @@ class Server {
    
          if (!api) {
             response.statusCode = 404;
-            response?.write('Route not found/ does not exist');
-            response?.end();
-            return;
-         }
+               response?.write({ statusCode: 404, message: "Route not found/ does not exist" });
+               response?.end();
+               return;
+            // response.json("Route not found/ does not exist");
+         }         
    
          const middlewaresInitiation = () => {
             for (var i = 0; i < api?.handler?.length; i++) {
@@ -122,7 +166,7 @@ class Server {
 
          const onData = (chunk: Buffer): void => {
             try {
-               const data = chunk?.toString();            
+               const data = chunk?.toString();
                const json = JSON.parse(data);
                request.body = json;
             } catch (e) {
@@ -151,10 +195,6 @@ class Server {
          }               
       });
    };
-
-   close() {
-      this.#httpServer.close();
-   }
 }
 
 export const server = new Server();

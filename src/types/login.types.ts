@@ -8,7 +8,7 @@ export interface ILoginRequest {
 }
 
 export interface ILoginResponse {
-   token: string;
+   token?: string;
    name: string
 }
 
