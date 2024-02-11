@@ -7,4 +7,4 @@ const rolesRouter = express.Router();
 // rolesRouter.put("/update/:id", RoleService.updateRoles);
 // rolesRouter.get("/list", RoleService.listOfRoles);
 
-export default rolesRouter;
+export {rolesRouter};

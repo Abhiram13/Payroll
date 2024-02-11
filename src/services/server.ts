@@ -1,117 +1,19 @@
-import * as https from 'https';
-import * as http from 'http';
-import * as fs from 'fs';
-import * as path from 'path';
-import { StatusCodes } from '../types/login.types';
+import {RouterNameSpace, ServerNameSpace, Server, Request, Response, IncomingMessage, ServerResponse, Method, StatusCode} from "../types/export.types";
+import {Router} from "./export.services";
 
-export type Request = http.IncomingMessage & {body: any, params: any};
-export type Response = MyResponse & {locals: any};
-type Middleware = (request: Request, response: Response) => void;
-export type Methods = 'GET' | 'POST' | 'PUT' | 'DELETE';
+class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNameSpace.IRouter {
+   #httpServer: Server;
+   #request: Request | null;
+   #response: Response | null;
+   routeHandlers: RouterNameSpace.IRouterHandlers[];
 
-const key = path.resolve(__dirname, '../../', './client-key.pem');
-const cert = path.resolve(__dirname, '../../', './client-cert.pem');
-
-interface IRouterMiddleWare {
-   path: string;
-   middlewares?: Middleware[] | undefined;
-   router: Router;  
-}
-
-interface IRoutingHandlers {
-   method?: Methods;
-   url: string;
-   handler: Middleware[];
-};
-
-const handlers: IRoutingHandlers[] = [];
-
-class MyResponse<Request extends http.IncomingMessage = http.IncomingMessage> extends http.ServerResponse<Request> {
-   #content_type: string = "application/json";
-
-   locals = {};
-
-   #parsing(stringifiedBody: any) {
-      try {
-         let check = JSON.parse(stringifiedBody);
-      } catch (e) {
-         
-      }
+   constructor () {
+      super();
+      this.#httpServer = new Server({ServerResponse: MyResponse});
+      this.routeHandlers = [];
+      this.#request = null;
+      this.#response = null
    }
-
-   json(body: any): void {
-      try {
-         const stringifiedBody: string = typeof body !== 'string' ? JSON.stringify(body) : body;         
-         this.setHeader('Content-Type', this.#content_type);
-         this.write(stringifiedBody);
-         this.end();
-      } catch (e) {
-         this.statusCode = StatusCodes.SERVER_ERROR;
-         this.write(`{ "statusCode": ${StatusCodes.SERVER_ERROR}, "message": "Some internal error at parsing given response" }`);
-         this.end();
-      }    
-   }
-}
-
-export class Router {
-   routeHandlers: IRoutingHandlers[] = [];
-
-   get(url: string = '/', ...middlewares: Middleware[]) {
-      this.routeHandlers?.push({handler: middlewares, url, method: 'GET'});
-   };
-
-   use({path, router, middlewares = []}: IRouterMiddleWare) {
-      router.routeHandlers.map(child => [
-         this.routeHandlers.push({
-            url: path + child?.url,
-            method: child?.method,
-            handler: [...middlewares, ...child?.handler]
-         })
-      ]);
-   }
-
-   post(url: string, ...middlewares: Middleware[]) {
-      this.routeHandlers?.push({
-         url,
-         method: 'POST',
-         handler: middlewares,
-      });
-   };
-}
-
-class Server {
-   // RUN COMMAND TO START NODE SERVER ==> npm run node SSL=true || SSL=true npm run node
-
-   #httpServer: http.Server | https.Server = process.env.SSL !== 'true' ? new http.Server({ServerResponse: MyResponse}) : new https.Server({
-      key: fs.readFileSync(key, 'utf-8'),
-      cert: fs.readFileSync(cert, 'utf-8'),
-   });
-
-   get(url: string, ...middlewares: Middleware[]) {
-      handlers?.push({
-         url: url,
-         method: 'GET',
-         handler: middlewares,
-      });
-   };
-
-   post(url: string, ...middlewares: Middleware[]) {
-      handlers?.push({
-         url: url,
-         method: 'POST',
-         handler: middlewares,
-      });
-   };
-
-   use({path, middlewares = [], router}: IRouterMiddleWare) {
-      router.routeHandlers.map(({handler, url, method}) => {
-         handlers?.push({
-            handler: [...middlewares, ...handler],
-            url: path + url,
-            method,
-         })
-      });
-   };
 
    address() {
       return this.#httpServer.address();
@@ -121,80 +23,90 @@ class Server {
       this.#httpServer.close();
    }
 
-   // #onRequest(req: Request, res: Response) {
-   //    const request = req;
-   //    const response = res;
-   //    const url: string | undefined = request?.url;
-   //    const method: Methods | undefined = request?.method as Methods;
-   //    const api: IRoutingHandlers | undefined = handlers?.filter(h => h?.url === url && h?.method === method)[0];
+   #processMiddlewares(api: RouterNameSpace.IRouterHandlers): void {
+      for (var i = 0; i < api?.handler?.length; i++) {
+         api?.handler[i]?.((this.#request as Request), (this.#response as Response));
+         const isResponseEnded: boolean = !!this.#response?.writableEnded;
+
+         if (isResponseEnded) break;
+      }
+   }
+
+   #onData(chunk: Buffer): void {
+      try {
+         const dataFromString = chunk?.toString();
+         const payload: any = JSON.parse(dataFromString);    
+         (this.#request as Request).body = payload;
+      } catch (e: any) {
+         (this.#request as Request).body = null;
+      }
+   }
+
+   #onEnd(api: RouterNameSpace.IRouterHandlers): void {
+      if (!this.#request?.body) {
+         this.#response?.json(StatusCode.BAD_REQUEST, JSON.stringify({
+            statusCode: StatusCode.BAD_REQUEST,
+            message: "Invalid payload",
+         }));
+         return;
+      }
+
+      this.#processMiddlewares(api);
+   }
+
+   // #validateEndPointUrl(currentUrl: string | undefined, urlInMiddleware: string): boolean {
+
    // }
 
-   listen(port: number = 3000, callback: () => void) {
-      const seconds = 1000;
-
-      // if API response not sent during this time, server will throw timeout error
-      this.#httpServer.timeout = 20 * seconds;
-      this.#httpServer.listen(port, callback);   
+   listen(port: number, callback: () => void): void {
+      this.#httpServer.timeout = 20 * 1000;
+      this.#httpServer.listen(port, callback);
       this.#httpServer.on('request', (req: Request, res: Response) => {
-         let request = req;
-         let response = res;
+         this.#request = req; 
+         this.#response = res;
 
-         response.locals = {};
-   
-         const url: string | undefined = request?.url;
-         const method: Methods | undefined = request?.method as Methods;
-         const api: IRoutingHandlers | undefined = handlers?.filter(h => h?.url === url && h?.method === method)[0];
-   
-         response.setHeader('Content-Type', 'application/json'); // setting it by default
-   
+         const url: string | undefined = this.#request?.url;
+         const method: Method | undefined = this.#request?.method as Method;
+         console.log({url});
+         const api: RouterNameSpace.IRouterHandlers | undefined = this.routeHandlers?.filter(h => h?.url === url && h?.method === method)?.[0];
+
+         console.log(this.routeHandlers);
+
          if (!api) {
-            response.statusCode = 404;
-               response?.write({ statusCode: 404, message: "Route not found/ does not exist" });
-               response?.end();
-               return;
-            // response.json("Route not found/ does not exist");
-         }         
-   
-         const middlewaresInitiation = () => {
-            for (var i = 0; i < api?.handler?.length; i++) {
-               api.handler[i]?.(request, response);
-               const isResponseEnded: boolean = response?.writableEnded;
-   
-               if (isResponseEnded) break;
-            };
-         };
-
-         const onData = (chunk: Buffer): void => {
-            try {
-               const data = chunk?.toString();
-               const json = JSON.parse(data);
-               request.body = json;
-            } catch (e) {
-               request.body = null;
-            }
-         };
-
-         const onEnd = (): void => {
-            if (!request?.body) {
-               response.statusCode = StatusCodes.BAD_REQUEST;
-               response.write(JSON.stringify({
-                  status: 500,
-                  error: false,
-                  message: "Invalid/ Empty payload"
-               }));
-               response.end();
-            } else {
-               middlewaresInitiation(); // calling here again because this function is getting called even before 'data' event is triggered
-            }
+            this.#response.json(StatusCode.NOT_FOUND, {statusCode: StatusCode.NOT_FOUND, message: "Route is not found/ invalid"});
+            return;
          }
-   
-         if (method === 'POST') { // this is for both POST and PUT
-            request.on('data', onData).on('end', onEnd);
+
+         if (this.#request?.method === Method.POST || this.#request?.method === Method.PUT) {
+            this.#request
+               ?.on('data', chunk => this.#onData(chunk))
+               ?.on('end', () => this.#onEnd(api));
          } else {
-            middlewaresInitiation();
-         }               
+            this.#processMiddlewares(api);
+         }
       });
-   };
+   }
 }
 
-export const server = new Server();
+class MyResponse<Request extends IncomingMessage = IncomingMessage> extends ServerResponse<Request> {
+   #content_type: string = "application/json";
+
+   locals = {};
+
+   json(status: number, body: any): void {
+      this.setHeader('Content-Type', this.#content_type);
+
+      try {
+         const res = JSON.stringify(body);
+         this.statusCode = status || 200;
+         this.write(res);
+      } catch(e: any) {
+         this.statusCode = 500;
+         this.write(JSON.stringify({message: e?.message || e}));
+      }
+
+      this.end();
+   }
+}
+
+export const server = new PayrollServer();

@@ -1,14 +1,11 @@
-import {Request, Response} from '../services/server';
-import * as EmployeeService from "../services/employee.service";
-import { authorization } from "../services/middleware.service";
-import { RoleIdentifier } from "../types/schemas";
-import { Router } from "../services/server";
+import {authorization, Router, fetchEmployee, insertEmployee} from "../services/export.services";
+import {Request, Response, RoleIdentifier} from "../types/export.types"
 
 const authorizationForInsertEmployee = (req: Request, res: Response) => authorization(req, res, [RoleIdentifier?.SuperAdmin]);
 
 const employeeRouter = new Router();
 
-employeeRouter.get('/fetch/:id', EmployeeService.fetchEmployee);
-employeeRouter.post('/add', authorizationForInsertEmployee, EmployeeService.insertEmployee);
+employeeRouter.get('/fetch/:id', fetchEmployee);
+employeeRouter.post('/add', authorizationForInsertEmployee, insertEmployee);
 
-export default employeeRouter;
+export {employeeRouter};

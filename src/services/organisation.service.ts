@@ -1,19 +1,15 @@
-import { Request, Response } from "../services/server";
-import { OrganisationController } from "../controllers/organisation.controller";
-import { IOrganisationSchema, IEmployeeSchema, IRoleSchema, RoleIdentifier } from "../types/schemas";
-import { IEncryptedToken, StatusCodes } from "../types/login.types";
-import { tables, ApiReponse, TimerMethod } from "./globals";
-import { EmployeeController } from "../controllers/employee.controller";
-import { RolesController } from "../controllers/roles.controller";
+import {ApiReponse, TimerMethod, tables} from "./export.services";
+import {OrganisationController, EmployeeController, RolesController} from "../controllers/export.controller";
+import {Request, Response, StatusCode, RoleIdentifier, IOrganisationSchema, IEmployeeSchema, IEncryptedToken} from "../types/export.types"
 
 export async function insertOrganisation(req: Request, res: Response) {
    try {
       // defining messages based on status codes
-      let messageMap = new Map<StatusCodes, string>();
-      messageMap.set(StatusCodes?.OK, "Organisation inserted successfully");
-      messageMap.set(StatusCodes?.NOT_MODIFIED, "Insering Organisation failed");
-      messageMap.set(StatusCodes?.BAD_REQUEST, "Provided payload in invalid / invalid admin_id");
-      messageMap.set(StatusCodes?.FORBIDDEN, "Given admin_id does not belongs to Organisation admin");
+      let messageMap = new Map<StatusCode, string>();
+      messageMap.set(StatusCode?.OK, "Organisation inserted successfully");
+      messageMap.set(StatusCode?.NOT_MODIFIED, "Insering Organisation failed");
+      messageMap.set(StatusCode?.BAD_REQUEST, "Provided payload in invalid / invalid admin_id");
+      messageMap.set(StatusCode?.FORBIDDEN, "Given admin_id does not belongs to Organisation admin");
 
       const controller = new OrganisationController();
       const empController = new EmployeeController();
@@ -23,7 +19,7 @@ export async function insertOrganisation(req: Request, res: Response) {
 
       // check if employee is valid
       if (!employee?.role_id) {
-         ApiReponse<null>({ res, status: StatusCodes?.BAD_REQUEST, message: messageMap.get(StatusCodes?.BAD_REQUEST) });
+         ApiReponse<null>({ res, status: StatusCode?.BAD_REQUEST, message: messageMap.get(StatusCode?.BAD_REQUEST) });
          return;
       }
 
@@ -31,7 +27,7 @@ export async function insertOrganisation(req: Request, res: Response) {
 
       // if user is valid, but not organisation admin
       if (role?.identifier !== RoleIdentifier?.OrganisationAdmin) {
-         ApiReponse<null>({ res, status: StatusCodes?.FORBIDDEN, message: messageMap?.get(StatusCodes?.FORBIDDEN) });
+         ApiReponse<null>({ res, status: StatusCode?.FORBIDDEN, message: messageMap?.get(StatusCode?.FORBIDDEN) });
          return;
       }
 
@@ -39,17 +35,17 @@ export async function insertOrganisation(req: Request, res: Response) {
       const list = await controller.find({name: regex});
 
       if (list?.length) {
-         ApiReponse<null>({ res, status: StatusCodes?.BAD_REQUEST, message: "Organisation already exists with given name" });
+         ApiReponse<null>({ res, status: StatusCode?.BAD_REQUEST, message: "Organisation already exists with given name" });
          return;
       }
 
       controller.body = payload;
 
       // inserting organisation in DB
-      const status: StatusCodes = await controller?.insert();
+      const status: StatusCode = await controller?.insert();
       ApiReponse<null>({ res, status: status, message: messageMap?.get(status) });
    } catch (e: any) {
-      ApiReponse<null>({ res, status: StatusCodes?.SERVER_ERROR, message: e?.message });
+      ApiReponse<null>({ res, status: StatusCode?.SERVER_ERROR, message: e?.message });
    }      
 }
 
@@ -86,7 +82,7 @@ export async function listOfOrganisations(req: Request, res: Response) {
       ];
 
       const data: IEmployeeSchema[] = await controller?.list();
-      const status: StatusCodes = data?.length ? StatusCodes?.OK : StatusCodes?.NO_DATA;
+      const status: StatusCode = data?.length ? StatusCode?.OK : StatusCode?.NO_DATA;
       const message: string | undefined = data?.length ? undefined : "No Employee found at given Organisation";      
 
       return {status, result: data, message};
@@ -109,13 +105,13 @@ export async function fetchOrganisation(req: Request, res: Response) {
          organisation = await controller.findById(token?.organisationId || "");
       }
 
-      const status: StatusCodes = organisation ? StatusCodes?.OK : StatusCodes?.NO_DATA;
+      const status: StatusCode = organisation ? StatusCode?.OK : StatusCode?.NO_DATA;
       const message: string | undefined = organisation ? undefined : 'No Organisation found';
 
       ApiReponse<IOrganisationSchema | IOrganisationSchema[] | null>({ res, status: status, result: organisation, message });
       return;
    } catch (e: any) {
-      ApiReponse<null>({ res, status: StatusCodes.SERVER_ERROR, message: e?.message });
+      ApiReponse<null>({ res, status: StatusCode.SERVER_ERROR, message: e?.message });
       return;
    }   
 }

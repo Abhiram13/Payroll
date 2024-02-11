@@ -1,12 +1,10 @@
-import * as OrgService from "../services/organisation.service";
-import { authorization } from "../services/middleware.service";
-import { RoleIdentifier } from "../types/schemas";
-import { Router } from "../services/server";
+import {Router, authorization, fetchOrganisation, insertOrganisation, listOfOrganisations} from "../services/export.services";
+import {RoleIdentifier} from "../types/export.types"
 
 const orgRouter = new Router();
 
-orgRouter.post('/add', (req, res) => authorization(req, res, [RoleIdentifier?.SuperAdmin]), OrgService.insertOrganisation);
-orgRouter.get("/employees", OrgService.listOfOrganisations);
-orgRouter.get("/list", OrgService.fetchOrganisation);
+orgRouter.post('/add', (req, res) => authorization(req, res, [RoleIdentifier?.SuperAdmin]), insertOrganisation);
+orgRouter.get("/employees", listOfOrganisations);
+orgRouter.get("/list", fetchOrganisation);
 
-export default orgRouter;
+export {orgRouter};

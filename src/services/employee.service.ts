@@ -1,12 +1,6 @@
-import { Request, Response } from "../services/server";
-import { EmployeeController } from "../controllers/employee.controller";
-import { IEmployeeSchema, IRoleSchema, RoleIdentifier } from "../types/schemas";
-import { OrganisationController } from "../controllers/organisation.controller";
-import { ObjectId } from "mongodb";
-import { ApiReponse } from "./globals";
-import { StatusCodes } from "../types/login.types";
-import Logger from "./logger.service";
-import { RolesController } from "../controllers/roles.controller";
+import {ApiReponse, Logger} from "./export.services";
+import {OrganisationController, EmployeeController, RolesController} from "../controllers/export.controller";
+import {Request, Response, StatusCode, RoleIdentifier, IOrganisationSchema, IEmployeeSchema, ObjectId} from "../types/export.types";
 
 /**
  * Only used to add Organisation admin
@@ -25,13 +19,13 @@ export async function insertEmployee(req: Request, res: Response) {
 
       // find if given organisation id is valid
       if (org?._id?.toString() !== body?.organisation_id) {
-         ApiReponse<null>({ res, status: StatusCodes?.BAD_REQUEST, message: "Organisation does not exist with given value" });
+         ApiReponse<null>({ res, status: StatusCode?.BAD_REQUEST, message: "Organisation does not exist with given value" });
          return;
       }
 
       // find if organisation already has an admin
       if (org?.admin_id) {
-         ApiReponse<null>({ res, status: StatusCodes?.BAD_REQUEST, message: "Organisation already contains an admin" });
+         ApiReponse<null>({ res, status: StatusCode?.BAD_REQUEST, message: "Organisation already contains an admin" });
          return;
       }
 
@@ -39,28 +33,28 @@ export async function insertEmployee(req: Request, res: Response) {
 
       // find if the employee is Organisation Admin
       if (roleIdentifier?.identifier !== RoleIdentifier?.OrganisationAdmin) {
-         ApiReponse<null>({ res, status: StatusCodes?.BAD_REQUEST, message: "role_id is invalid. Role should be organisation admin" });
+         ApiReponse<null>({ res, status: StatusCode?.BAD_REQUEST, message: "role_id is invalid. Role should be organisation admin" });
          return;
       }
 
       // manager id is not needed when adding organisation admin
       if (body?.manager_id !== null) {
-         ApiReponse<null>({ res, status: StatusCodes?.BAD_REQUEST, message: "manager_id should not be included at organisation level" });
+         ApiReponse<null>({ res, status: StatusCode?.BAD_REQUEST, message: "manager_id should not be included at organisation level" });
          return;
       }
 
       controller.body = body;
 
       const message = await controller?.insert();
-      const map = new Map<StatusCodes, string>();
-      map.set(StatusCodes.BAD_REQUEST, "Something went wrong when inserting the employee");
-      map.set(StatusCodes.OK, "Employee was successfully added");
-      map.set(StatusCodes.NOT_MODIFIED, "Adding employee was not successful or not modified");
+      const map = new Map<StatusCode, string>();
+      map.set(StatusCode.BAD_REQUEST, "Something went wrong when inserting the employee");
+      map.set(StatusCode.OK, "Employee was successfully added");
+      map.set(StatusCode.NOT_MODIFIED, "Adding employee was not successful or not modified");
 
       ApiReponse<null>({res, status: message, error: false, message: map.get(message)});
    } catch (e: any) {
       Logger.error(`Error at insertEmployee API: ${e?.message}, Stack: ${e?.stack}`);
-      ApiReponse<null>({res, status: StatusCodes?.SERVER_ERROR, error: true, message: "Something went wrong"});
+      ApiReponse<null>({res, status: StatusCode?.SERVER_ERROR, error: true, message: "Something went wrong"});
    }
 }
 
@@ -69,6 +63,5 @@ export async function fetchEmployee(req: Request, res: Response) {
    const controller = new EmployeeController();
    const result = await controller?.findById(id, { first_name: 1, last_name: 1 });
    
-   res?.write(result);
-   res?.end();
+   ApiReponse<any>({ res, status: StatusCode?.OK, result });
 }

@@ -1,6 +1,6 @@
 import * as Hash from 'crypto';
 
-export default class Hashing {
+export class Hashing {
    static #BYTES: Buffer = Hash.randomBytes(12);
 
    static encrypt<T>(payload: T): string {

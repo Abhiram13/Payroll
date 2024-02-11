@@ -1,7 +1,5 @@
-import { login } from "../services/login.service";
-import { authentication } from "../services/middleware.service";
-import apiRouter from "./apis.router";
-import {Router} from '../services/server';
+import {apiRouter} from "./export.routes";
+import {Router, login, authentication, authorization} from '../services/export.services';
 import * as os from 'os';
 
 const router = new Router();
@@ -12,4 +10,4 @@ router.get('/', (req, res) => {
    res?.end();
 });
 router.post('/login', login);
-export default router; 
+export {router};

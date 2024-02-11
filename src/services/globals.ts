@@ -1,7 +1,4 @@
-import { Response } from "./server";
-import { IApiResponse, IApiResponsePayload } from "../types/login.types"
-import { StatusCodes } from "../types/login.types";
-import { IEmployeeSchema } from "../types/schemas"
+import { IApiResponse, IApiResponsePayload, StatusCode, Response } from "../types/export.types"
 
 require('dotenv').config();
 
@@ -19,12 +16,8 @@ export function ApiReponse<T>(payload: IApiResponsePayload<T>): void {
 
     if (result) response.result = result;
     if (message) response.message = message;
-
-    const stringifiedResponse: string = JSON.stringify(response);
-
-    res.statusCode = status;
-    res.write(stringifiedResponse);
-    res.end();
+    
+    res.json(status, response);
 }
 
 /**
@@ -35,13 +28,13 @@ export async function TimerMethod<T>(res: Response, callback: () => Promise<any>
     const RESPONSE_TIMER = 3000; // 3000 milliseconds = 3 seconds
 
     const timer = setTimeout(() => {
-        ApiReponse<null>({ res, status: StatusCodes?.TIMEOUT, message: "Session timed out" });
+        ApiReponse<null>({ res, status: StatusCode?.TIMEOUT, message: "Session timed out" });
         isTimedOut = true;
     }, RESPONSE_TIMER);
 
     const x = await callback();
 
-    isTimedOut === false && ApiReponse<T | undefined>({ res, status: StatusCodes?.OK, result: x?.result, message: x?.message });
+    isTimedOut === false && ApiReponse<T | undefined>({ res, status: StatusCode?.OK, result: x?.result, message: x?.message });
 
     clearTimeout(timer);
 }

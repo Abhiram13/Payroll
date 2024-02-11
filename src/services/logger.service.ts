@@ -35,7 +35,7 @@ function fileNameWithDate(): string {
    return `${dt}_${m}_${y}`;
 }
 
-export default class Logger {
+export class Logger {
    static #red: string = '\x1b[31m%s\x1b[0m';
    static #blue: string = '\x1b[36m%s\x1b[0m'
    static #yellow: string = '\x1b[33m%s\x1b[0m';

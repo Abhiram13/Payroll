@@ -1,8 +1,5 @@
 import { MONGO as DB } from "../../index";
-import { Collection, Document, Filter, UpdateFilter } from "mongodb";
-import {ObjectId} from "bson";
-import { IMongo, StatusCodes } from "../types/login.types";
-import { IProjectFields } from "../types/schemas";
+import {IMongo, StatusCode, IProjectFields, ObjectId, Collection, Filter, UpdateFilter, Document} from "../types/export.types";
 
 export default class Controller<T extends Document> {
    collection: string;
@@ -15,24 +12,24 @@ export default class Controller<T extends Document> {
       this.aggregate = [];
    }
 
-   async insert(): Promise<StatusCodes.BAD_REQUEST | StatusCodes.OK | StatusCodes.NOT_MODIFIED> {
+   async insert(): Promise<StatusCode.BAD_REQUEST | StatusCode.OK | StatusCode.NOT_MODIFIED> {
       try {
          const collection: Collection = DB.client.db(process.env.DB).collection(this.collection);
          const document = collection.insertOne(this.body);
          const { acknowledged } = await document;
-         const status: StatusCodes = acknowledged ? StatusCodes?.OK : StatusCodes?.NOT_MODIFIED
+         const status: StatusCode = acknowledged ? StatusCode?.OK : StatusCode?.NOT_MODIFIED
 
          return status;
       } catch(e) {
-         return StatusCodes?.BAD_REQUEST;
+         return StatusCode?.BAD_REQUEST;
       }
    };
 
-   async update(filter: Filter<Document> = {}, set: UpdateFilter<T>): Promise<StatusCodes> {
+   async update(filter: Filter<Document> = {}, set: UpdateFilter<T>): Promise<StatusCode> {
       const collection: Collection = DB.client.db(process.env.DB).collection(this.collection);
       const document = collection.updateOne(filter, set)
       const { acknowledged } = await document;
-      const status: StatusCodes = acknowledged ? StatusCodes?.OK : StatusCodes?.NOT_MODIFIED
+      const status: StatusCode = acknowledged ? StatusCode?.OK : StatusCode?.NOT_MODIFIED
 
       return status;
    };

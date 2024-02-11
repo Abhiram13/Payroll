@@ -1,10 +1,6 @@
-import Hashing from "./hashing";
-import { IEncryptedToken, StatusCodes } from "../types/login.types";
-import { EmployeeController } from "../controllers/employee.controller";
-import { IEmployeeSchema, RoleIdentifier } from "../types/schemas";
-import Logger from "./logger.service";
-import { ApiReponse } from "./globals";
-import { Request, Response } from "./server";
+import {IEncryptedToken, StatusCode, RoleIdentifier, Request, Response} from "../types/export.types";
+import {EmployeeController} from "../controllers/export.controller";
+import {Logger, ApiReponse, Hashing} from "./export.services";
 
 export async function authentication(req: Request, res: Response) {
    const token: string | undefined = req?.headers['authorization'];
@@ -17,7 +13,7 @@ export async function authentication(req: Request, res: Response) {
          const tenMinutes: number = 600000;
 
          if (durationDiff > tenMinutes) {
-            ApiReponse<null>({ res, status: StatusCodes?.UN_AUTHORISE, message: "token expired" });
+            ApiReponse<null>({ res, status: StatusCode?.UNAUTHORISE, message: "token expired" });
             return;
          }
 
@@ -29,15 +25,15 @@ export async function authentication(req: Request, res: Response) {
             return;
          }
    
-         ApiReponse<null>({ res, status: StatusCodes?.UN_AUTHORISE, message: "Un Authorise" });
+         ApiReponse<null>({ res, status: StatusCode?.UNAUTHORISE, message: "Un Authorise" });
          return;
       };
    
-      ApiReponse<null>({ res, status: StatusCodes?.UN_AUTHORISE, message: "token is invalid/ not provided" });
+      ApiReponse<null>({ res, status: StatusCode?.UNAUTHORISE, message: "token is invalid/ not provided" });
       return;
    } catch (e: any) {
       Logger?.error(`Error at Authenticate service: ${e?.message}, Stack is: ${e?.stack}`);
-      ApiReponse<null>({ res, status: StatusCodes?.UN_AUTHORISE, message: e?.message });
+      ApiReponse<null>({ res, status: StatusCode?.UNAUTHORISE, message: e?.message });
       return;      
    }   
 }
@@ -47,13 +43,13 @@ export async function authorization(req: Request, res: Response, roles: RoleIden
       const payload: IEncryptedToken = res?.locals?.payload;
 
       if (!roles?.includes(payload?.roleIdentifier)) {
-         ApiReponse<null>({ res, status: StatusCodes?.FORBIDDEN, message: "Current user do not have access to this API" });
+         ApiReponse<null>({ res, status: StatusCode?.FORBIDDEN, message: "Current user do not have access to this API" });
          return;
       }
 
       return;
    } catch (e: any) {
-      ApiReponse<null>({ res, status: StatusCodes?.UN_AUTHORISE, message: e?.message });
+      ApiReponse<null>({ res, status: StatusCode?.UNAUTHORISE, message: e?.message });
       return;
    }
 }
