@@ -1,6 +1,26 @@
 import {IncomingMessage, ServerResponse, AddressInfo} from "./export.types";
 
-export type Request = IncomingMessage & {body: any, params: any};
+interface ParamsDictionary {
+   [key: string]: string;
+}
+
+type RemoveTail<S extends string, Tail extends string> = S extends `${infer P}${Tail}` ? P : S;
+type GetRouteParameter<S extends string> = RemoveTail<RemoveTail<RemoveTail<S, `/${string}`>, `-${string}`>, `.${string}`>;
+
+type RouteParameters<Route extends string> = string extends Route
+   ? ParamsDictionary
+   : Route extends `${string}(${string}`
+      ? ParamsDictionary
+      : Route extends `${string}:${infer Rest}`
+         ? (GetRouteParameter<Rest> extends never
+            ? ParamsDictionary
+            : GetRouteParameter<Rest> extends `${infer ParamName}?`
+               ? { [P in ParamName]?: string }
+               : { [P in GetRouteParameter<Rest>]: string }
+            ) & (Rest extends `${GetRouteParameter<Rest>}${infer Next}` ? RouteParameters<Next> : unknown)
+         : {};
+
+export type Request<Route extends string = any, P = RouteParameters<Route>> = IncomingMessage & {body: any, params: P};
 export type Response = ServerResponse & {locals: any, json(status: StatusCode, body: any): void};
 
 /**
@@ -34,14 +54,14 @@ export namespace RouterNameSpace {
     * and attaches `Content-Type` header to `application/json` as default
     * @returns void - Sends response to the client or goes to next middleware
     */
-   export type Middleware = (request: Request, response: Response) => void;
+   export type Middleware<Url extends string> = (request: Request<Url>, response: Response) => void;
 
    /**
     * Type that defines signature of methods like `GET`, `POST`, `PUT` and `DELETE`
     * @param {string} url - URL of the API End point. Appends provided URL to its parent URL to create complete end point.
     * @param {Middleware[]} middlewares - Array of middlewares that gets processed in the provided URL end point
     */
-   type HttpMethodAttributes = (url: string, ...middlewares: Middleware[]) => void;
+   type HttpMethodAttributes = (url: string, ...middlewares: Middleware<any>[]) => void;
 
    /**
     * Attributes or Type used at `use()` method from the **Router** class. Used as parent router<br><br>
@@ -56,7 +76,7 @@ export namespace RouterNameSpace {
    export interface IRouterAttributes {
       path: string;
       router: IRouter;
-      middlewares?: Middleware[];
+      middlewares?: Middleware<any>[];
    }
 
    /**
@@ -65,8 +85,8 @@ export namespace RouterNameSpace {
    export interface IRouterHandlers {
       method?: Method;
       url: string;
-      handler: Middleware[];
-      params?: {[key: string]: any}[];
+      handler: Middleware<any>[];
+      params?: {[key: string]: any};
    }
 
    /**
@@ -81,7 +101,7 @@ export namespace RouterNameSpace {
       /**
        * method that used for `GET` request
        */
-      get: HttpMethodAttributes;
+      get<Url extends string>(url: Url, ...middlewares: Middleware<Url>[]): void;
 
       /**
        * method that used for `POST` request

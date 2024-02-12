@@ -54,9 +54,31 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
       this.#processMiddlewares(api);
    }
 
-   // #validateEndPointUrl(currentUrl: string | undefined, urlInMiddleware: string): boolean {
+   #validateEndPointUrl(currentUrl: string, urlInMiddleware: string, params = {}): boolean {
+      let splitOfMiddlewareUrl: string | string[] = urlInMiddleware?.split("/"), splitOfRequestUrl: string | string[] = currentUrl?.split("/"), queryParams = params;
 
-   // }
+      for (var i = 0; i < splitOfMiddlewareUrl?.length; i++) {
+         if (splitOfMiddlewareUrl[i]?.startsWith(":")) {
+            const key = splitOfMiddlewareUrl[i]?.replace(":", "");
+
+            splitOfMiddlewareUrl[i] = splitOfRequestUrl[i];
+
+            queryParams = {
+               ...queryParams,
+               [key]: splitOfRequestUrl[i] || '',
+            };
+         }
+      }
+
+      splitOfMiddlewareUrl = splitOfMiddlewareUrl?.join("/");
+      splitOfRequestUrl = splitOfRequestUrl?.join("/");
+
+      if (this.#request) {
+         this.#request.params = {...this.#request.params, ...queryParams};
+      }
+
+      return splitOfMiddlewareUrl === splitOfRequestUrl;
+   }
 
    listen(port: number, callback: () => void): void {
       this.#httpServer.timeout = 20 * 1000;
@@ -65,12 +87,14 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
          this.#request = req; 
          this.#response = res;
 
-         const url: string | undefined = this.#request?.url;
+         const url: string | undefined = this.#request?.url as string;
          const method: Method | undefined = this.#request?.method as Method;
-         console.log({url});
-         const api: RouterNameSpace.IRouterHandlers | undefined = this.routeHandlers?.filter(h => h?.url === url && h?.method === method)?.[0];
+         const api: RouterNameSpace.IRouterHandlers | undefined = this.routeHandlers?.filter(h => h?.url === url && h?.method === method)?.[0];         
 
-         console.log(this.routeHandlers);
+         this.routeHandlers?.map(r => {
+            this.#validateEndPointUrl(url, r.url, r.params);
+            return;
+         })
 
          if (!api) {
             this.#response.json(StatusCode.NOT_FOUND, {statusCode: StatusCode.NOT_FOUND, message: "Route is not found/ invalid"});
