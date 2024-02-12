@@ -1,160 +1,133 @@
-import * as https from 'https';
-import * as http from 'http';
-import * as fs from 'fs';
-import * as path from 'path';
-import { StatusCodes } from '../types/login.types';
+import {RouterNameSpace, ServerNameSpace, Server, Request, Response, IncomingMessage, ServerResponse, Method, StatusCode} from "../types/export.types";
+import {Router} from "./export.services";
 
-export type Request = http.IncomingMessage & {body: any, params: any};
-export type Response = http.ServerResponse & {locals: any};
-type Middleware = (request: Request, response: Response) => void;
-export type Methods = 'GET' | 'POST' | 'PUT' | 'DELETE';
+class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNameSpace.IRouter {
+   #httpServer: Server;
+   #request: Request | null;
+   #response: Response | null;
+   routeHandlers: RouterNameSpace.IRouterHandlers[];
 
-const key = path.resolve(__dirname, '../../', './client-key.pem');
-const cert = path.resolve(__dirname, '../../', './client-cert.pem');
-
-interface IRouterMiddleWare {
-   path: string;
-   middlewares?: Middleware[] | undefined;
-   router: Router;  
-}
-
-interface IRoutingHandlers {
-   method?: Methods;
-   url: string;
-   handler: Middleware[];
-};
-
-const handlers: IRoutingHandlers[] = [];
-
-export class Router {
-   routeHandlers: IRoutingHandlers[] = [];
-
-   get(url: string = '/', ...middlewares: Middleware[]) {
-      this.routeHandlers?.push({handler: middlewares, url, method: 'GET'});
-   };
-
-   use({path, router, middlewares = []}: IRouterMiddleWare) {
-      router.routeHandlers.map(child => [
-         this.routeHandlers.push({
-            url: path + child?.url,
-            method: child?.method,
-            handler: [...middlewares, ...child?.handler]
-         })
-      ]);
+   constructor () {
+      super();
+      this.#httpServer = new Server({ServerResponse: MyResponse});
+      this.routeHandlers = [];
+      this.#request = null;
+      this.#response = null
    }
 
-   post(url: string, ...middlewares: Middleware[]) {
-      this.routeHandlers?.push({
-         url,
-         method: 'POST',
-         handler: middlewares,
-      });
-   };
-}
-
-class Server {
-   // RUN COMMAND TO START NODE SERVER ==> npm run node SSL=true || SSL=true npm run node
-
-   #httpServer: http.Server | https.Server = process.env.SSL !== 'true' ? new http.Server() : new https.Server({
-      key: fs.readFileSync(key, 'utf-8'),
-      cert: fs.readFileSync(cert, 'utf-8'),
-   });
-
-   get(url: string, ...middlewares: Middleware[]) {
-      handlers?.push({
-         url: url,
-         method: 'GET',
-         handler: middlewares,
-      });
-   };
-
-   post(url: string, ...middlewares: Middleware[]) {
-      handlers?.push({
-         url: url,
-         method: 'POST',
-         handler: middlewares,
-      });
-   };
-
-   use({path, middlewares = [], router}: IRouterMiddleWare) {
-      router.routeHandlers.map(({handler, url, method}) => {
-         handlers?.push({
-            handler: [...middlewares, ...handler],
-            url: path + url,
-            method,
-         })
-      });
-   };
-
-   listen(port: number = 3000, callback: () => void) {
-      const seconds = 1000;
-
-      // if API response not sent during this time, server will throw timeout error
-      this.#httpServer.timeout = 20 * seconds;
-      this.#httpServer.listen(port, callback);   
-      this.#httpServer.on('request', (req: Request, res: Response) => {
-         let request = req;
-         let response = res;
-
-         response.locals = {};
-   
-         const url: string | undefined = request?.url;
-         const method: Methods | undefined = request?.method as Methods;
-         const api: IRoutingHandlers | undefined = handlers?.filter(h => h?.url === url && h?.method === method)[0];
-   
-         response.setHeader('Content-Type', 'application/json'); // setting it by default
-   
-         if (!api) {
-            response.statusCode = 404;
-            response?.write('Route not found/ does not exist');
-            response?.end();
-            return;
-         }
-   
-         const middlewaresInitiation = () => {
-            for (var i = 0; i < api?.handler?.length; i++) {
-               api.handler[i]?.(request, response);
-               const isResponseEnded: boolean = response?.writableEnded;
-   
-               if (isResponseEnded) break;
-            };
-         };
-
-         const onData = (chunk: Buffer): void => {
-            try {
-               const data = chunk?.toString();            
-               const json = JSON.parse(data);
-               request.body = json;
-            } catch (e) {
-               request.body = null;
-            }
-         };
-
-         const onEnd = (): void => {
-            if (!request?.body) {
-               response.statusCode = StatusCodes.BAD_REQUEST;
-               response.write(JSON.stringify({
-                  status: 500,
-                  error: false,
-                  message: "Invalid/ Empty payload"
-               }));
-               response.end();
-            } else {
-               middlewaresInitiation(); // calling here again because this function is getting called even before 'data' event is triggered
-            }
-         }
-   
-         if (method === 'POST') { // this is for both POST and PUT
-            request.on('data', onData).on('end', onEnd);
-         } else {
-            middlewaresInitiation();
-         }               
-      });
-   };
+   address() {
+      return this.#httpServer.address();
+   }
 
    close() {
       this.#httpServer.close();
    }
+
+   #processMiddlewares(api: RouterNameSpace.IRouterHandlers): void {
+      for (var i = 0; i < api?.handler?.length; i++) {
+         api?.handler[i]?.((this.#request as Request), (this.#response as Response));
+         const isResponseEnded: boolean = !!this.#response?.writableEnded;
+
+         if (isResponseEnded) break;
+      }
+   }
+
+   #onData(chunk: Buffer): void {
+      try {
+         const dataFromString = chunk?.toString();
+         const payload: any = JSON.parse(dataFromString);    
+         (this.#request as Request).body = payload;
+      } catch (e: any) {
+         (this.#request as Request).body = null;
+      }
+   }
+
+   #onEnd(api: RouterNameSpace.IRouterHandlers): void {
+      if (!this.#request?.body) {
+         this.#response?.json(StatusCode.BAD_REQUEST, JSON.stringify({
+            statusCode: StatusCode.BAD_REQUEST,
+            message: "Invalid payload",
+         }));
+         return;
+      }
+
+      this.#processMiddlewares(api);
+   }
+
+   #validateEndPointUrl(currentUrl: string, urlInMiddleware: string, params = {}): boolean {
+      let splitOfMiddlewareUrl: string | string[] = urlInMiddleware?.split("/"), splitOfRequestUrl: string | string[] = currentUrl?.split("/"), queryParams = params;
+
+      for (var i = 0; i < splitOfMiddlewareUrl?.length; i++) {
+         if (splitOfMiddlewareUrl[i]?.startsWith(":")) {
+            const key = splitOfMiddlewareUrl[i]?.replace(":", "");
+
+            splitOfMiddlewareUrl[i] = splitOfRequestUrl[i];
+
+            queryParams = {
+               ...queryParams,
+               [key]: splitOfRequestUrl[i] || '',
+            };
+         }
+      }
+
+      splitOfMiddlewareUrl = splitOfMiddlewareUrl?.join("/");
+      splitOfRequestUrl = splitOfRequestUrl?.join("/"); 
+
+      const isSameUrl: boolean = splitOfMiddlewareUrl === splitOfRequestUrl;
+
+      if (this.#request && isSameUrl) {
+         this.#request.params = {...this.#request.params, ...queryParams};         
+      }
+
+      return isSameUrl;
+   }
+
+   listen(port: number, callback: () => void): void {
+      this.#httpServer.timeout = 20 * 1000;
+      this.#httpServer.listen(port, callback);
+      this.#httpServer.on('request', (req: Request, res: Response) => {
+         this.#request = req; 
+         this.#response = res;
+
+         const url: string | undefined = this.#request?.url as string;
+         const method: Method | undefined = this.#request?.method as Method;
+         const api: RouterNameSpace.IRouterHandlers | undefined = this.routeHandlers?.filter(h => this.#validateEndPointUrl(url, h.url, h.params) && h?.method === method)?.[0];
+
+         if (!api) {
+            this.#response.json(StatusCode.NOT_FOUND, {statusCode: StatusCode.NOT_FOUND, message: "Route is not found/ invalid"});
+            return;
+         }
+
+         if (this.#request?.method === Method.POST || this.#request?.method === Method.PUT) {
+            this.#request
+               ?.on('data', chunk => this.#onData(chunk))
+               ?.on('end', () => this.#onEnd(api));
+         } else {
+            this.#processMiddlewares(api);
+         }
+      });
+   }
 }
 
-export const server = new Server();
+class MyResponse<Request extends IncomingMessage = IncomingMessage> extends ServerResponse<Request> {
+   #content_type: string = "application/json";
+
+   locals = {};
+
+   json(status: number, body: any): void {
+      this.setHeader('Content-Type', this.#content_type);
+
+      try {
+         const res = JSON.stringify(body);
+         this.statusCode = status || 200;
+         this.write(res);
+      } catch(e: any) {
+         this.statusCode = 500;
+         this.write(JSON.stringify({message: e?.message || e}));
+      }
+
+      this.end();
+   }
+}
+
+export const server = new PayrollServer();
