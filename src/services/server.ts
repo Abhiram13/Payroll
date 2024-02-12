@@ -71,13 +71,15 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
       }
 
       splitOfMiddlewareUrl = splitOfMiddlewareUrl?.join("/");
-      splitOfRequestUrl = splitOfRequestUrl?.join("/");
+      splitOfRequestUrl = splitOfRequestUrl?.join("/"); 
 
-      if (this.#request) {
-         this.#request.params = {...this.#request.params, ...queryParams};
+      const isSameUrl: boolean = splitOfMiddlewareUrl === splitOfRequestUrl;
+
+      if (this.#request && isSameUrl) {
+         this.#request.params = {...this.#request.params, ...queryParams};         
       }
 
-      return splitOfMiddlewareUrl === splitOfRequestUrl;
+      return isSameUrl;
    }
 
    listen(port: number, callback: () => void): void {
@@ -89,12 +91,7 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
 
          const url: string | undefined = this.#request?.url as string;
          const method: Method | undefined = this.#request?.method as Method;
-         const api: RouterNameSpace.IRouterHandlers | undefined = this.routeHandlers?.filter(h => h?.url === url && h?.method === method)?.[0];         
-
-         this.routeHandlers?.map(r => {
-            this.#validateEndPointUrl(url, r.url, r.params);
-            return;
-         })
+         const api: RouterNameSpace.IRouterHandlers | undefined = this.routeHandlers?.filter(h => this.#validateEndPointUrl(url, h.url, h.params) && h?.method === method)?.[0];
 
          if (!api) {
             this.#response.json(StatusCode.NOT_FOUND, {statusCode: StatusCode.NOT_FOUND, message: "Route is not found/ invalid"});
