@@ -50,43 +50,41 @@ export async function insertOrganisation(req: Request, res: Response) {
 }
 
 export async function listOfOrganisations(req: Request, res: Response) {
-   await TimerMethod<IEmployeeSchema[]>(res, async () => {
-      const controller = new EmployeeController();
-      const orgId: string = res?.locals?.payload?.organisationId;
-      controller.aggregate = [
-         { $match: { "organisation_id": orgId } },
-         {
-            $addFields: { organisation_id: { $toObjectId: "$organisation_id" } }
-         },
-         {
-            $lookup: {
-               from: tables?.organisation,
-               localField: "organisation_id",
-               foreignField: "_id",
-               as: "Organisation"
-            }
-         },
-         { $project: { username: 0, password: 0 } },
-         {
-            $project: {
-               organisation_name: {
-                  $reduce: {
-                     input: "$Organisation.name",
-                     initialValue: "",
-                     in: { $concat: ["$$value", "$$this"] }
-                  }
-               },
-               first_name: 1, last_name: 1, phone: 1, email: 1, date_of_birth: 1
-            }
+   const controller = new EmployeeController();
+   const orgId: string = res?.locals?.payload?.organisationId;
+   controller.aggregate = [
+      { $match: { "organisation_id": orgId } },
+      {
+         $addFields: { organisation_id: { $toObjectId: "$organisation_id" } }
+      },
+      {
+         $lookup: {
+            from: tables?.organisation,
+            localField: "organisation_id",
+            foreignField: "_id",
+            as: "Organisation"
          }
-      ];
+      },
+      { $project: { username: 0, password: 0 } },
+      {
+         $project: {
+            organisation_name: {
+               $reduce: {
+                  input: "$Organisation.name",
+                  initialValue: "",
+                  in: { $concat: ["$$value", "$$this"] }
+               }
+            },
+            first_name: 1, last_name: 1, phone: 1, email: 1, date_of_birth: 1
+         }
+      }
+   ];
 
-      const data: IEmployeeSchema[] = await controller?.list();
-      const status: StatusCode = data?.length ? StatusCode?.OK : StatusCode?.NO_DATA;
-      const message: string | undefined = data?.length ? undefined : "No Employee found at given Organisation";      
+   const data: IEmployeeSchema[] = await controller?.list();
+   const status: StatusCode = StatusCode?.OK;
+   const message: string | undefined = data?.length ? undefined : "No Employee found at given Organisation";
 
-      return {status, result: data, message};
-   });
+   ApiReponse<IEmployeeSchema[]>({ res, status, message });   
 }
 
 // fetches list of organisation if loggedin user is super admin, 
@@ -105,7 +103,7 @@ export async function fetchOrganisation(req: Request, res: Response) {
          organisation = await controller.findById(token?.organisationId || "");
       }
 
-      const status: StatusCode = organisation ? StatusCode?.OK : StatusCode?.NO_DATA;
+      const status: StatusCode = StatusCode?.OK;
       const message: string | undefined = organisation ? undefined : 'No Organisation found';
 
       ApiReponse<IOrganisationSchema | IOrganisationSchema[] | null>({ res, status: status, result: organisation, message });

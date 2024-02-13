@@ -5,10 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build": "npm install & tsc",
-    "prenode": "tsc",
-    "node": "ts-node-dev --respawn --transpile-only ./index.ts $SSL $PORT",
-    "postnode": "echo \"Typescript server stopped\"",
-    "start": "tsc & node build/index.js",
+    "prestart": "tsc",
+    "start": "ts-node-dev --respawn --transpile-only ./index.ts $SSL $PORT",
+    "poststart": "echo \"Typescript server stopped\"",  
     "test": "jest"
   },
   "author": "Abhiram",
