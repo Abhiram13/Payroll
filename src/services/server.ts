@@ -3,16 +3,12 @@ import {Router} from "./export.services";
 
 class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNameSpace.IRouter {
    #httpServer: Server;
-   #request: Request | null;
-   #response: Response | null;
    routeHandlers: RouterNameSpace.IRouterHandlers[];
 
    constructor () {
       super();
       this.#httpServer = new Server({ServerResponse: MyResponse});
       this.routeHandlers = [];
-      this.#request = null;
-      this.#response = null
    }
 
    address() {
@@ -23,38 +19,38 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
       this.#httpServer.close();
    }
 
-   #processMiddlewares(api: RouterNameSpace.IRouterHandlers): void {
+   #processMiddlewares(api: RouterNameSpace.IRouterHandlers, request: Request, response: Response): void {
       for (var i = 0; i < api?.handler?.length; i++) {
-         api?.handler[i]?.((this.#request as Request), (this.#response as Response));
-         const isResponseEnded: boolean = !!this.#response?.writableEnded;
+         api?.handler[i]?.((request as Request), (response as Response));
+         const isResponseEnded: boolean = !!response?.writableEnded;
 
          if (isResponseEnded) break;
       }
    }
 
-   #onData(chunk: Buffer): void {
+   #onData(chunk: Buffer, request: Request): void {
       try {
          const dataFromString = chunk?.toString();
          const payload: any = JSON.parse(dataFromString);    
-         (this.#request as Request).body = payload;
+         (request as Request).body = payload;
       } catch (e: any) {
-         (this.#request as Request).body = null;
+         (request as Request).body = null;
       }
    }
 
-   #onEnd(api: RouterNameSpace.IRouterHandlers): void {
-      if (!this.#request?.body) {
-         this.#response?.json(StatusCode.BAD_REQUEST, JSON.stringify({
+   #onEnd(api: RouterNameSpace.IRouterHandlers, request: Request, response: Response): void {
+      if (!request?.body) {
+         response?.json(StatusCode.BAD_REQUEST, JSON.stringify({
             statusCode: StatusCode.BAD_REQUEST,
             message: "Invalid payload",
          }));
          return;
       }
 
-      this.#processMiddlewares(api);
+      this.#processMiddlewares(api, request, response);
    }
 
-   #validateEndPointUrl(currentUrl: string, urlInMiddleware: string, params = {}): boolean {
+   #validateEndPointUrl(currentUrl: string, urlInMiddleware: string, params = {}, request: Request): boolean {
       let splitOfMiddlewareUrl: string | string[] = urlInMiddleware?.split("/"), splitOfRequestUrl: string | string[] = currentUrl?.split("/"), queryParams = params;
 
       for (var i = 0; i < splitOfMiddlewareUrl?.length; i++) {
@@ -75,8 +71,8 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
 
       const isSameUrl: boolean = splitOfMiddlewareUrl === splitOfRequestUrl;
 
-      if (this.#request && isSameUrl) {
-         this.#request.params = {...this.#request.params, ...queryParams};         
+      if (request && isSameUrl) {
+         request.params = {...request.params, ...queryParams};
       }
 
       return isSameUrl;
@@ -85,25 +81,22 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
    listen(port: number, callback: () => void): void {
       this.#httpServer.timeout = 20 * 1000;
       this.#httpServer.listen(port, callback);
-      this.#httpServer.on('request', (req: Request, res: Response) => {
-         this.#request = req; 
-         this.#response = res;
-
-         const url: string | undefined = this.#request?.url as string;
-         const method: Method | undefined = this.#request?.method as Method;
-         const api: RouterNameSpace.IRouterHandlers | undefined = this.routeHandlers?.filter(h => this.#validateEndPointUrl(url, h.url, h.params) && h?.method === method)?.[0];
+      this.#httpServer.on('request', (request: Request, response: Response) => {
+         const url: string | undefined = request?.url as string;
+         const method: Method | undefined = request?.method as Method;
+         const api: RouterNameSpace.IRouterHandlers | undefined = this.routeHandlers?.filter(h => this.#validateEndPointUrl(url, h.url, h.params, request) && h?.method === method)?.[0];
 
          if (!api) {
-            this.#response.json(StatusCode.NOT_FOUND, {statusCode: StatusCode.NOT_FOUND, message: "Route is not found/ invalid"});
+            response.json(StatusCode.NOT_FOUND, {statusCode: StatusCode.NOT_FOUND, message: "Route is not found/ invalid"});
             return;
          }
 
-         if (this.#request?.method === Method.POST || this.#request?.method === Method.PUT) {
-            this.#request
-               ?.on('data', chunk => this.#onData(chunk))
-               ?.on('end', () => this.#onEnd(api));
+         if (request?.method === Method.POST || request?.method === Method.PUT) {
+            request
+               ?.on('data', chunk => this.#onData(chunk, request))
+               ?.on('end', () => this.#onEnd(api, request, response));
          } else {
-            this.#processMiddlewares(api);
+            this.#processMiddlewares(api, request, response);
          }
       });
    }

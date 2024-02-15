@@ -1,5 +1,6 @@
 import {IncomingMessage, ServerResponse, AddressInfo} from "./export.types";
 
+/** FROM EXPRESS MODULE */
 interface ParamsDictionary {
    [key: string]: string;
 }
@@ -19,6 +20,8 @@ type RouteParameters<Route extends string> = string extends Route
                : { [P in GetRouteParameter<Rest>]: string }
             ) & (Rest extends `${GetRouteParameter<Rest>}${infer Next}` ? RouteParameters<Next> : unknown)
          : {};
+
+/** FROM EXPRESS MODULE */
 
 export type Request<Route extends string = any, P = RouteParameters<Route>> = IncomingMessage & {body: any, params: P};
 export type Response = ServerResponse & {locals: any, json(status: StatusCode, body: any): void};
