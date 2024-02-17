@@ -1,13 +1,12 @@
 import {apiRouter} from "./export.routes";
 import {Router, login, authentication, authorization} from '../services/export.services';
-import * as os from 'os';
+import {StatusCode} from "../types/export.types";
 
 const router = new Router();
 
 router.use({path: '/api', middlewares: [authentication], router: apiRouter});
 router.get('/', (req, res) => {   
-   res?.write(`Hi There this is from HOSTNAME: ${os?.hostname()} PORT: ${process?.env?.PORT}`);
-   res?.end();
+   res.json(StatusCode.OK, {statusCode: StatusCode.OK, message: "This is a ping"});
 });
 router.post('/login', login);
 export {router};
