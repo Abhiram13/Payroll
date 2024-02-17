@@ -40,10 +40,10 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
 
    #onEnd(api: RouterNameSpace.IRouterHandlers, request: Request, response: Response): void {
       if (!request?.body) {
-         response?.json(StatusCode.BAD_REQUEST, JSON.stringify({
+         response?.json(StatusCode.BAD_REQUEST, {
             statusCode: StatusCode.BAD_REQUEST,
             message: "Invalid payload",
-         }));
+         });
          return;
       }
 
