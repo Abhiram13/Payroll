@@ -4,7 +4,6 @@ import Controller from "./controller";
 
 export class CheckInController<T extends Document> extends Controller<T> {
    constructor() {
-      super();
-      this.collection = tables?.checkins;      
+      super(tables?.checkins);
    }
 }

@@ -1,5 +1,5 @@
 import { Mongo } from "./src/db";
-import {router} from './src/routes/export.routes';
+import {router} from './src/routes/export.router';
 import {Logger, server} from "./src/services/export.services";
 
 require('dotenv').config();
@@ -13,7 +13,6 @@ function StartServer(): void {
    Mongo.Connect();
    Logger.info(`TypeScript started on port ${port}!`);
 }
-
 
 server.listen(Number(port), StartServer);
 server.use({ path: '', router: router });

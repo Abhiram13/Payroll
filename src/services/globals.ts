@@ -1,7 +1,5 @@
 import { IApiResponse, IApiResponsePayload, StatusCode, Response } from "../types/export.types"
 
-require('dotenv').config();
-
 export const tables = {
     employee: process?.env?.EMPLOYEE as string,
     leaves: process?.env?.LEAVES as string,

@@ -5,7 +5,7 @@ import {Request, Response, StatusCode, ILoginResponse} from "../types/export.typ
 export async function login(req: Request, res: Response) {
    try {
       const controller = new LoginController(req?.body);
-      const data = await controller?.login();
+      const data: ILoginResponse | null = await controller?.login();
       const status: StatusCode = data?.token ? StatusCode.OK : StatusCode.BAD_REQUEST;
       const message: string | undefined = data?.token ? undefined : "Invalid Credentials";
       ApiReponse<ILoginResponse | null>({ res, status: status, result: data, message });

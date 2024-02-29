@@ -6,8 +6,7 @@ type RoleId = {role_id: string};
 
 export class EmployeeController extends Controller<IEmployeeSchema> {
    constructor() {
-      super();
-      this.collection = tables?.employee;
+      super(tables?.employee);
    }
 
    async fetchEmployeeByAdminId(adminId: string): Promise<RoleId | null> {
