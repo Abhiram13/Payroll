@@ -15,6 +15,14 @@ export class Router implements RouterNameSpace.IRouter {
       this.routeHandlers.push({ url, method: Method.POST, handler: middlewares });
    }
 
+   put<T extends string>(url: T, ...middlewares: RouterNameSpace.Middleware<T>[]): void {
+      this.routeHandlers.push({ url, method: Method.PUT, handler: middlewares });
+   }
+
+   delete<T extends string>(url: T, ...middlewares: RouterNameSpace.Middleware<T>[]): void {
+      this.routeHandlers.push({ url, method: Method.DELETE, handler: middlewares });
+   }
+
    #queryParams(url: string) {
       const split: string[] = url?.split("/");
       let params: { [key: string]: any } = {};

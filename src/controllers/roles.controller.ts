@@ -5,8 +5,7 @@ import { IRoleIdentifier } from "../types/login.types";
 
 export class RolesController extends Controller<IRoleSchema> {
    constructor() {
-      super();
-      this.collection = tables?.roles;      
+      super(tables?.roles);
    }
 
    async fetchRoleIdentifierByEmpRoleId(roleId: string): Promise<IRoleIdentifier | null> {

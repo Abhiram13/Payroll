@@ -112,6 +112,16 @@ export namespace RouterNameSpace {
       post: HttpMethodAttributes;
 
       /**
+       * method that used for `PUT` request
+       */
+      put: HttpMethodAttributes;
+
+      /**
+       * method that used for `DELETE` request
+       */
+      delete: HttpMethodAttributes;
+
+      /**
        * method that will be used for initial routing
        */
       use: (attributes: IRouterAttributes) => void;

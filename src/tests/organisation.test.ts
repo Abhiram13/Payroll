@@ -45,5 +45,5 @@ describe("Employee router", () => {
 
 afterAll(() => {
    server?.close();
-   MONGO.client.close();
+   MONGO.close();
 });
