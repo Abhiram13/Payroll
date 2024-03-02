@@ -1,13 +1,29 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, Db } from "./types/export.types";
+import {Logger} from "./services/logger.service";
 require('dotenv').config();
 
-export class Mongo {
-   private static URI: string = `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@${process.env.HOST}/?retryWrites=true&w=majority`;
-   static client: MongoClient = new MongoClient(Mongo.URI);
-   static async Connect(): Promise<void> {
+class MongoDB {
+   #url: string;
+   #client: MongoClient;
+
+   constructor() {
+      this.#url = `mongodb+srv://${process.env.USERNAME}:${process.env.PASSWORD}@${process.env.HOST}/?retryWrites=true&w=majority`;
+      this.#client = new MongoClient(this.#url);
+   }
+
+   async connect(): Promise<void> {
       try {
-         await Mongo.client.connect();
-         Mongo.client.db(process.env.DB);
-      } catch (e: any) { }
+         await this.#client.connect();
+      } catch (e: any) {}
+   }
+
+   db(): Db {
+      return this.#client.db(process.env.DB);
+   }
+
+   close() {
+      this.#client.close();
    }
 }
+
+export const Mongo = new MongoDB();

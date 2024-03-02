@@ -9,4 +9,5 @@ router.get('/', (req, res) => {
    res.json(StatusCode.OK, {statusCode: StatusCode.OK, message: "This is a ping"});
 });
 router.post('/login', login);
+
 export {router};

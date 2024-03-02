@@ -1,4 +1,4 @@
-import { MONGO as DB } from "../../index";
+import { MONGO } from "../../index";
 import {IMongo, StatusCode, IProjectFields, ObjectId, Collection, Filter, UpdateFilter, Document, OptionalUnlessRequiredId} from "../types/export.types";
 
 export default class Controller<T extends Document> {
@@ -9,7 +9,7 @@ export default class Controller<T extends Document> {
    constructor(collectionName: string) {
       this.body = {} as T;
       this.aggregate = [];
-      this.#collection = DB.client.db(process.env.DB).collection<T>(collectionName);
+      this.#collection = MONGO.db().collection<T>(collectionName);
    }
 
    async insert(): Promise<StatusCode.BAD_REQUEST | StatusCode.OK | StatusCode.NOT_MODIFIED> {

@@ -40,6 +40,6 @@ describe("Login API", () => {
 
 afterAll(done => {
    server?.close();
-   MONGO.client.close();
+   MONGO.close();
    done();
 });

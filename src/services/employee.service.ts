@@ -1,19 +1,17 @@
 import {ApiReponse, Logger} from "./export.services";
 import {OrganisationController, EmployeeController, RolesController} from "../controllers/export.controller";
-import {Request, Response, StatusCode, RoleIdentifier, IOrganisationSchema, IEmployeeSchema, ObjectId} from "../types/export.types";
+import {Request, Response, StatusCode, Role, IOrganisationSchema, IEmployeeSchema, ObjectId} from "../types/export.types";
 
 /**
  * Only used to add Organisation admin
  */
 export async function insertEmployee(req: Request, res: Response) {
    try {
-      const body: IEmployeeSchema = req?.body;
-      // initiate employee controller
-      const controller = new EmployeeController();
-      // initiate organisation controller
-      const orgControler = new OrganisationController();
-      // initiate role controller
+      const body: IEmployeeSchema = req?.body;      
+      const controller = new EmployeeController();      
+      const orgControler = new OrganisationController();      
       const roleControler = new RolesController();
+      
       // fetch organisation admin_id and _id
       const org = await orgControler?.findById(body?.organisation_id || "", { _id: 1, admin_id: 1 }) as unknown as { _id: ObjectId, admin_id: string };
 
@@ -32,7 +30,7 @@ export async function insertEmployee(req: Request, res: Response) {
       const roleIdentifier = await roleControler?.fetchRoleIdentifierByEmpRoleId(body?.role_id);
 
       // find if the employee is Organisation Admin
-      if (roleIdentifier?.identifier !== RoleIdentifier?.OrganisationAdmin) {
+      if (roleIdentifier?.identifier !== Role?.OrganisationAdmin) {
          ApiReponse<null>({ res, status: StatusCode?.BAD_REQUEST, message: "role_id is invalid. Role should be organisation admin" });
          return;
       }

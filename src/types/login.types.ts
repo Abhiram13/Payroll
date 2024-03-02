@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { Response, RoleIdentifier, StatusCode } from "./export.types";
+import { Response, Role, StatusCode } from "./export.types";
 
 export interface ILoginRequest {
    user_name: string;
@@ -31,11 +31,11 @@ export interface IEncryptedToken {
    managerId?: string;
    organisationId?: string;
    roleId: string;
-   roleIdentifier: RoleIdentifier;
+   roleIdentifier: Role;
    userName: string;
    time: number;
 }
 
 export interface IRoleIdentifier {
-   identifier: RoleIdentifier;
+   identifier: Role;
 }

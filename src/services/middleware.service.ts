@@ -1,4 +1,4 @@
-import {IEncryptedToken, StatusCode, RoleIdentifier, Request, Response} from "../types/export.types";
+import {IEncryptedToken, StatusCode, Role, Request, Response} from "../types/export.types";
 import {EmployeeController} from "../controllers/export.controller";
 import {Logger, ApiReponse, Hashing} from "./export.services";
 
@@ -38,7 +38,10 @@ export async function authentication(req: Request, res: Response) {
    }   
 }
 
-export async function authorization(req: Request, res: Response, roles: RoleIdentifier[]) {
+/**
+ * @param {Role} roles - List of roles that needs to be authorised 
+ */
+export async function authorization(req: Request, res: Response, roles: Role[]) {
    try {
       const payload: IEncryptedToken = res?.locals?.payload;
 

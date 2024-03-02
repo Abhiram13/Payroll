@@ -9,7 +9,7 @@ enum CheckInStatus {
     pending = 2
 }
 
-export enum RoleIdentifier {
+export enum Role {
     SuperAdmin = 1,
     OrganisationAdmin = 2,
     ReportingManager = 3,
@@ -52,7 +52,7 @@ export interface ICheckInSchema {
 
 export interface IRoleSchema {
     name: string;
-    identifier: RoleIdentifier;
+    identifier: Role;
 }
 
 export type IProjectFields<T> = {

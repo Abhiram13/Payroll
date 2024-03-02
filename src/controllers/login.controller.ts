@@ -1,5 +1,5 @@
 import {RolesController, EmployeeController} from "./export.controller";
-import {IEmployeeSchema, IMongo, ILoginRequest, ILoginResponse, IRoleIdentifier, RoleIdentifier, IEncryptedToken} from "../types/export.types";
+import {IEmployeeSchema, IMongo, ILoginRequest, ILoginResponse, IRoleIdentifier, Role, IEncryptedToken} from "../types/export.types";
 import {Hashing} from "../services/export.services";
 
 type EmployeeWithMongo = (IEmployeeSchema & IMongo);
@@ -36,7 +36,7 @@ export class LoginController {
             const { _id: employee_id, manager_id, organisation_id, role_id, username, first_name, last_name } = list[0];
             const roleController = new RolesController();
             const result: IRoleIdentifier | null = await roleController?.findById(role_id, {identifier: 1}, {_id: 0, name: 0});
-            const identifier: RoleIdentifier | null = result?.identifier || null;
+            const identifier: Role | null = result?.identifier || null;
 
             if (!identifier) {
                return null;

@@ -7,7 +7,7 @@ const fileName: string = fileNameWithDate();
 
 type LogType = "ERROR" | "LOG" | "INFO" | "WARN";
 
-export async function writeFile(): Promise<void> {
+async function writeFile(): Promise<void> {
    try {            
       await fs?.mkdir(folderWithPath, {recursive: true});      
       Logger.info('Log Folder was created');
@@ -35,29 +35,31 @@ function fileNameWithDate(): string {
    return `${dt}_${m}_${y}`;
 }
 
-export class Logger {
+class LoggerService {
    static #red: string = '\x1b[31m%s\x1b[0m';
    static #blue: string = '\x1b[36m%s\x1b[0m'
    static #yellow: string = '\x1b[33m%s\x1b[0m';
    static #white: string = '\x1b[37m%s\x1b[0m';
 
    static info(...arg: any): void {
-      console.log(`[${Logger.#blue}]`, 'INFO', ...arg);
-      // appendFile(arg, 'INFO');
+      console.log(`[${LoggerService.#blue}]`, 'INFO', ...arg);
+      appendFile(arg, 'INFO');
    }
 
    static error(...arg: any): void {
-      console.log(`[${Logger.#red}]`, 'ERROR', ...arg);
-      // appendFile(arg, 'ERROR');
+      console.log(`[${LoggerService.#red}]`, 'ERROR', ...arg);
+      appendFile(arg, 'ERROR');
    }
 
    static warn(...arg: any): void {
-      console.log(`[${Logger.#yellow}]`, 'WARN', ...arg);
-      // appendFile(arg, 'WARN');
+      console.log(`[${LoggerService.#yellow}]`, 'WARN', ...arg);
+      appendFile(arg, 'WARN');
    }
 
    static log(...arg: any): void {
-      console.log(`[${Logger.#white}]`, 'LOG', ...arg);
-      // appendFile(arg, 'LOG');
+      console.log(`[${LoggerService.#white}]`, 'LOG', ...arg);
+      appendFile(arg, 'LOG');
    }
 }
+
+export const Logger = process.env.NODE_ENV === 'test' ? console : LoggerService;

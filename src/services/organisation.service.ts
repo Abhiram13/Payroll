@@ -1,6 +1,6 @@
 import {ApiReponse, TimerMethod, tables} from "./export.services";
 import {OrganisationController, EmployeeController, RolesController} from "../controllers/export.controller";
-import {Request, Response, StatusCode, RoleIdentifier, IOrganisationSchema, IEmployeeSchema, IEncryptedToken} from "../types/export.types"
+import {Request, Response, StatusCode, Role, IOrganisationSchema, IEmployeeSchema, IEncryptedToken} from "../types/export.types"
 
 export async function insertOrganisation(req: Request, res: Response) {
    try {
@@ -26,7 +26,7 @@ export async function insertOrganisation(req: Request, res: Response) {
       const role = await roleController?.fetchRoleIdentifierByEmpRoleId(employee?.role_id || "");
 
       // if user is valid, but not organisation admin
-      if (role?.identifier !== RoleIdentifier?.OrganisationAdmin) {
+      if (role?.identifier !== Role?.OrganisationAdmin) {
          ApiReponse<null>({ res, status: StatusCode?.FORBIDDEN, message: messageMap?.get(StatusCode?.FORBIDDEN) });
          return;
       }
@@ -97,7 +97,7 @@ export async function fetchOrganisation(req: Request, res: Response) {
       const role = await roleController.fetchRoleIdentifierByEmpRoleId(token?.roleId || "")
       let organisation: IOrganisationSchema | IOrganisationSchema[] | null = null;
 
-      if (role?.identifier === RoleIdentifier?.SuperAdmin) {
+      if (role?.identifier === Role?.SuperAdmin) {
          organisation = await controller?.list();
       } else {
          organisation = await controller.findById(token?.organisationId || "");

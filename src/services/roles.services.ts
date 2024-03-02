@@ -1,12 +1,12 @@
 import {RolesController} from "../controllers/export.controller";
-import {RoleIdentifier, IRoleSchema, Request, Response, StatusCode} from "../types/export.types";
+import {Role, IRoleSchema, Request, Response, StatusCode} from "../types/export.types";
 import {ApiReponse} from "./export.services";
 
 export async function insertRoles(req: Request, res: Response) {
    const controller = new RolesController();
    const payload: IRoleSchema = req?.body;
 
-   if (!Object.values(RoleIdentifier).includes(payload?.identifier)) {
+   if (!Object.values(Role).includes(payload?.identifier)) {
       ApiReponse<null>({
          res,
          status: StatusCode?.BAD_REQUEST,
@@ -42,7 +42,7 @@ export async function updateRoles(req: Request, res: Response) {
       return;
    }
 
-   if (!Object.values(RoleIdentifier).includes(payload?.identifier)) {
+   if (!Object.values(Role).includes(payload?.identifier)) {
       // ApiReponse<null>(res, StatusCode?.BAD_REQUEST, null, "Invalid Role identifier");
       ApiReponse<null>({
          res,
