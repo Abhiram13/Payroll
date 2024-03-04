@@ -19,9 +19,9 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
       this.#httpServer.close();
    }
 
-   #processMiddlewares(api: RouterNameSpace.IRouterHandlers, request: Request, response: Response): void {
+   async #processMiddlewares(api: RouterNameSpace.IRouterHandlers, request: Request, response: Response): Promise<void> {
       for (var i = 0; i < api?.handler?.length; i++) {
-         api?.handler[i]?.((request as Request), (response as Response));
+         await api?.handler[i]?.((request as Request), (response as Response));
          const isResponseEnded: boolean = !!response?.writableEnded;
 
          if (isResponseEnded) break;
