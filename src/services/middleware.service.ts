@@ -1,5 +1,5 @@
 import {IEncryptedToken, StatusCode, Role, Request, Response} from "../types/export.types";
-import {EmployeeController} from "../controllers/export.controller";
+import {EmployeeController, RolesController} from "../controllers/export.controller";
 import {Logger, ApiReponse, Hashing} from "./export.services";
 
 export async function authentication(req: Request, res: Response) {
@@ -20,8 +20,10 @@ export async function authentication(req: Request, res: Response) {
          const empController = new EmployeeController();
          const employee = await empController.findById(decrypted?.id?.toString());
    
-         if (employee && employee?.username) {            
-            res.locals.payload = decrypted;            
+         if (employee && employee?.username) {
+            const roleController = new RolesController();
+            const role = await roleController.fetchRoleIdentifierByEmpRoleId(employee.role_id);             
+            res.locals.payload = {...decrypted, roleIdentifier: role?.identifier};            
             return;
          }
    

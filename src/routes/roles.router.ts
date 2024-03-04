@@ -1,10 +1,10 @@
-import express from "express";
-import * as RoleService from "../services/roles.services";
+import {listOfRoles} from "../services/roles.services";
+import {Router} from "../services/export.services";
 
-const rolesRouter = express.Router();
+const rolesRouter = new Router();
 
 // rolesRouter.post("/add", RoleService.insertRoles);
 // rolesRouter.put("/update/:id", RoleService.updateRoles);
-// rolesRouter.get("/list", RoleService.listOfRoles);
+rolesRouter.get("/list", listOfRoles);
 
 export {rolesRouter};
