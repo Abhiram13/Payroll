@@ -41,7 +41,7 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
    #onEnd(api: RouterNameSpace.IRouterHandlers, request: Request, response: Response): void {
       if (!request?.body) {
          response?.json(StatusCode.BAD_REQUEST, {
-            statusCode: StatusCode.BAD_REQUEST,
+            status: StatusCode.BAD_REQUEST,
             message: "Invalid payload",
          });
          return;
@@ -79,9 +79,19 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
    }
 
    listen(port: number, callback: () => void): void {
-      this.#httpServer.timeout = 20 * 1000;
-      this.#httpServer.listen(port, callback);
+      this.#httpServer.timeout = 20 * 1000;      
+      this.#httpServer.listen(port, callback)
       this.#httpServer.on('request', (request: Request, response: Response) => {
+         response.setHeader("Access-Control-Allow-Origin", (request?.headers?.origin || "*"));
+         response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+         response.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Cache-Control");
+
+         if (request?.method === 'OPTIONS') {
+            response.writeHead(StatusCode.OK);
+            response.end();
+            return;
+         }
+
          const url: string | undefined = request?.url as string;
          const method: Method | undefined = request?.method as Method;
          const api: RouterNameSpace.IRouterHandlers | undefined = this.routeHandlers?.filter(h => this.#validateEndPointUrl(url, h.url, h.params, request) && h?.method === method)?.[0];
@@ -107,15 +117,15 @@ class MyResponse<Request extends IncomingMessage = IncomingMessage> extends Serv
 
    locals = {};
 
-   json(status: number, body: any): void {
-      this.setHeader('Content-Type', this.#content_type);
+   json(status: number, body: any): void {      
+      this.setHeader('Content-Type', this.#content_type);      
 
       try {
          const res = JSON.stringify(body);
-         this.statusCode = status || 200;
+         this.statusCode = status || StatusCode.OK;
          this.write(res);
       } catch(e: any) {
-         this.statusCode = 500;
+         this.statusCode = StatusCode.SERVER_ERROR;
          this.write(JSON.stringify({message: e?.message || e}));
       }
 
