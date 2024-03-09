@@ -1,5 +1,5 @@
 import {RouterNameSpace, ServerNameSpace, Server, Request, Response, IncomingMessage, ServerResponse, Method, StatusCode} from "../types/export.types";
-import {Router} from "./export.services";
+import {Logger, Router} from "./export.services";
 
 class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNameSpace.IRouter {
    #httpServer: Server;
@@ -20,12 +20,18 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
    }
 
    async #processMiddlewares(api: RouterNameSpace.IRouterHandlers, request: Request, response: Response): Promise<void> {
-      for (var i = 0; i < api?.handler?.length; i++) {
-         await api?.handler[i]?.((request as Request), (response as Response));
-         const isResponseEnded: boolean = !!response?.writableEnded;
+      try {
+         for (var i = 0; i < api?.handler?.length; i++) {
+            await api?.handler[i]?.((request as Request), (response as Response));
+            const isResponseEnded: boolean = !!response?.writableEnded;
 
-         if (isResponseEnded) break;
-      }
+            if (isResponseEnded) break;
+         }
+      } catch (e: any) {
+         Logger.error(e, 'Caught at #processMiddleware');
+         response.json(StatusCode.SERVER_ERROR, {status: StatusCode.SERVER_ERROR, error: true, message: e?.message});
+         return;
+      }      
    }
 
    #onData(chunk: Buffer, request: Request): void {

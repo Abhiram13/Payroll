@@ -21,6 +21,7 @@ server.use({ path: '', router: router });
 process.stdin.resume();
 
 process.on('SIGINT', signal => {
+   Logger.warn('Closing server and it`s connections..');
    Mongo.close();
    server.close();
 
