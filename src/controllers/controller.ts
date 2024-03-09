@@ -12,19 +12,15 @@ export default class Controller<T extends Document> {
       this.#collection = MONGO.db().collection<T>(collectionName);
    }
 
-   async insert(): Promise<StatusCode.BAD_REQUEST | StatusCode.OK | StatusCode.NOT_MODIFIED> {
-      try {         
-         const document = this.#collection.insertOne(this.body as OptionalUnlessRequiredId<T>);
-         const { acknowledged } = await document;
-         const status: StatusCode = acknowledged ? StatusCode?.OK : StatusCode?.NOT_MODIFIED
+   async insert(): Promise<StatusCode.OK | StatusCode.NOT_MODIFIED> {
+      const document = this.#collection.insertOne(this.body as OptionalUnlessRequiredId<T>);
+      const { acknowledged } = await document;
+      const status: StatusCode = acknowledged ? StatusCode?.OK : StatusCode?.NOT_MODIFIED
 
-         return status;
-      } catch(e) {
-         return StatusCode?.BAD_REQUEST;
-      }
+      return status;
    };
 
-   async update(filter: Filter<Document> = {}, set: UpdateFilter<T>): Promise<StatusCode> {     
+   async update(filter: Filter<Document> = {}, set: UpdateFilter<T>): Promise<StatusCode> {
       const document = this.#collection.updateOne(filter, set)
       const { acknowledged } = await document;
       const status: StatusCode = acknowledged ? StatusCode?.OK : StatusCode?.NOT_MODIFIED
@@ -45,19 +41,15 @@ export default class Controller<T extends Document> {
    }
 
    async findById(id: string, includeFields: Partial<IProjectFields<T & IMongo>> = {}, excludeFields: Partial<IProjectFields<T & IMongo>> = {}): Promise<T | null> {
-      try {
-         const aggregate: Document[] = [
-            { $match: { _id: new ObjectId(id) } }
-         ];
+      const aggregate: Document[] = [
+         { $match: { _id: new ObjectId(id) } }
+      ];
 
-         Object.keys(includeFields)?.length && aggregate.push({ $project: includeFields });
-         Object.keys(excludeFields)?.length && aggregate.push({ $project: excludeFields });
+      Object.keys(includeFields)?.length && aggregate.push({ $project: includeFields });
+      Object.keys(excludeFields)?.length && aggregate.push({ $project: excludeFields });
 
-         const data = await this.#collection.aggregate<T>(aggregate).toArray();
+      const data = await this.#collection.aggregate<T>(aggregate).toArray();
 
-         return data?.length ? data[0] : null;
-      } catch (e) {
-         return null;
-      }
+      return data?.length ? data[0] : null;
    };
 }

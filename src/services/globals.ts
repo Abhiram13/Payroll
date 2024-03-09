@@ -1,4 +1,4 @@
-import { IApiResponse, IApiResponsePayload, StatusCode, Response } from "../types/export.types"
+import { IApiResponse, IApiResponsePayload, ErrorType } from "../types/export.types";
 
 export const tables = {
     employee: process?.env?.EMPLOYEE as string,
@@ -18,21 +18,11 @@ export function ApiReponse<T>(payload: IApiResponsePayload<T>): void {
     res.json(status, response);
 }
 
-/**
- * Trigger `setTimeout` with `3` second time limit, if API takes longer than 3 seconds, return `504` timeout error
- */
-export async function TimerMethod<T>(res: Response, callback: () => Promise<any>): Promise<void> {
-    var isTimedOut: boolean = false;
-    const RESPONSE_TIMER = 3000; // 3000 milliseconds = 3 seconds
-
-    const timer = setTimeout(() => {
-        ApiReponse<null>({ res, status: StatusCode?.TIMEOUT, message: "Session timed out" });
-        isTimedOut = true;
-    }, RESPONSE_TIMER);
-
-    const x = await callback();
-
-    isTimedOut === false && ApiReponse<T | undefined>({ res, status: StatusCode?.OK, result: x?.result, message: x?.message });
-
-    clearTimeout(timer);
+export class MyError extends Error {
+    constructor(error: Error) {
+        super(error?.message || "");
+        this.name = error?.name || ErrorType.MyError;
+        this.message = error?.message || "Something went wrong";
+        this.stack = error?.stack || "";
+    }
 }

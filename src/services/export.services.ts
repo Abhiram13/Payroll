@@ -1,7 +1,7 @@
 export {Router} from "./router";
 export {server} from "./server";
 export {Logger} from "./logger.service";
-export {ApiReponse, tables, TimerMethod} from "./globals";
+export {ApiReponse, tables, MyError} from "./globals";
 export {Hashing} from "./hashing";
 export {login} from "./login.service";
 export {authentication, authorization} from "./middleware.service";

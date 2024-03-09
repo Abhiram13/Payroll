@@ -34,7 +34,7 @@ export async function authentication(req: Request, res: Response) {
       ApiReponse<null>({ res, status: StatusCode?.UNAUTHORISE, message: "token is invalid/ not provided" });
       return;
    } catch (e: any) {
-      Logger?.error(`Error at Authenticate service: ${e?.message}, Stack is: ${e?.stack}`);
+      Logger?.error(e, `Error at Authenticate service`);
       ApiReponse<null>({ res, status: StatusCode?.UNAUTHORISE, message: e?.message });
       return;      
    }   

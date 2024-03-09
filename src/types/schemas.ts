@@ -16,6 +16,15 @@ export enum Role {
     Employee = 4
 }
 
+export enum ErrorType {
+    MongoInvalidArgumentError = "MongoInvalidArgumentError",
+    TypeError = "TypeError",
+    MyError = "MyError",
+    Default = "Error",
+    BSONError = "BSONError",
+    MongoAPIError = "MongoAPIError",
+}
+
 export interface IEmployeeSchema {
     first_name: string;
     last_name: string;

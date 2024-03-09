@@ -1,6 +1,6 @@
 import {ApiReponse, Logger} from "./export.services";
 import {OrganisationController, EmployeeController, RolesController} from "../controllers/export.controller";
-import {Request, Response, StatusCode, Role, IOrganisationSchema, IEmployeeSchema, ObjectId} from "../types/export.types";
+import {Request, Response, StatusCode, Role, ErrorType, IEmployeeSchema, ObjectId} from "../types/export.types";
 
 /**
  * Only used to add Organisation admin
@@ -51,15 +51,35 @@ export async function insertEmployee(req: Request, res: Response) {
 
       ApiReponse<null>({res, status: message, error: false, message: map.get(message)});
    } catch (e: any) {
-      Logger.error(`Error at insertEmployee API: ${e?.message}, Stack: ${e?.stack}`);
+      Logger.error(e, `Error at insertEmployee API`);
       ApiReponse<null>({res, status: StatusCode?.SERVER_ERROR, error: true, message: "Something went wrong"});
    }
 }
 
 export async function fetchEmployee(req: Request, res: Response) {
-   const id: string = req?.params?.id;
-   const controller = new EmployeeController();
-   const result = await controller?.findById(id, { first_name: 1, last_name: 1 });
+   try {
+      const id: string = req?.params?.id;
+      const controller = new EmployeeController();
+      const result = await controller?.findById(id, { first_name: 1, last_name: 1 });
    
-   ApiReponse<any>({ res, status: StatusCode?.OK, result });
+      ApiReponse<any>({ res, status: StatusCode?.OK, result });
+   } catch (e: any) {
+      Logger.error(e, 'Error at Fetch employee by Id API');
+
+      let message: string;
+      let status: StatusCode = StatusCode.SERVER_ERROR;
+
+      switch (e?.name) {
+         case ErrorType.BSONError: message = "Seems wrong/ invalid ID provided"; status = StatusCode.BAD_REQUEST; break;
+         case ErrorType.TypeError: message = "Something went wrong at parsing of data"; status = StatusCode.SERVER_ERROR; break;
+         default: message = "Something went wrong"; status = StatusCode.SERVER_ERROR; break;
+      };
+
+      ApiReponse<null>({
+         res, 
+         status, 
+         error: true,
+         message
+      });
+   }
 }

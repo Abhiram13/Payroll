@@ -1,6 +1,6 @@
 import {RolesController, EmployeeController} from "./export.controller";
 import {IEmployeeSchema, IMongo, ILoginRequest, ILoginResponse, IRoleIdentifier, Role, IEncryptedToken} from "../types/export.types";
-import {Hashing} from "../services/export.services";
+import {Hashing, MyError} from "../services/export.services";
 
 type EmployeeWithMongo = (IEmployeeSchema & IMongo);
 
@@ -59,7 +59,7 @@ export class LoginController {
 
          return null;
       } catch (e: any) {
-         throw new Error(e?.message);         
+         throw new MyError(e);
       } 
    }
 }

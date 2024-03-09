@@ -1,5 +1,6 @@
 import { MongoClient, Db } from "./types/export.types";
-import {Logger} from "./services/logger.service";
+import { Logger } from "./services/export.services";
+
 require('dotenv').config();
 
 class MongoDB {
@@ -14,7 +15,11 @@ class MongoDB {
    async connect(): Promise<void> {
       try {
          await this.#client.connect();
-      } catch (e: any) {}
+      } catch (e: any) {
+         Logger.error(e, 'At Mongo');
+         Logger.warn('Closing the DB connection');
+         this.close();
+      }
    }
 
    db(): Db {
