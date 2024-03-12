@@ -10,7 +10,7 @@ export async function login(req: Request, res: Response) {
       const message: string | undefined = data?.token ? undefined : "Invalid Credentials";
       ApiReponse<ILoginResponse | null>({ res, status: status, result: data, message });
    } catch (e: any) {
-      Logger.error(e, `Error testing at Login service:`);   
+      Logger.error(e, `Error testing at Login service. Stack ${e?.stack}`);
       
       let message: string;
 

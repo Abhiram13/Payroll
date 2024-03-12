@@ -7,19 +7,11 @@ const fileName: string = fileNameWithDate();
 
 type LogType = "ERROR" | "LOG" | "INFO" | "WARN";
 
-async function writeFile(): Promise<void> {
-   try {            
-      await fs?.mkdir(folderWithPath, {recursive: true});      
-      Logger.info('Log Folder was created');
-   } catch (e: any) {
-      Logger.error(e, 'error at creating Log folder: ');
-   }
-}
-
 async function appendFile(content: any, type: LogType = 'LOG'): Promise<void> {
    try {
       const TIMESTAMP: string = new Date().toLocaleTimeString()?.substring(0, 8);      
       const logInformation: string = `${TIMESTAMP} [${type}] - ${content}\n`;
+
       fs.appendFile(`${folderWithPath}/${fileName}.log`, logInformation);
    } catch (e: any) {
       Logger.error(e, `Error at appending file at ${folderWithPath}/${fileName}.log: `);
@@ -27,12 +19,7 @@ async function appendFile(content: any, type: LogType = 'LOG'): Promise<void> {
 }
 
 function fileNameWithDate(): string {
-   let date = new Date().toLocaleString();
-   let [d, t] = date?.split(", ");
-   let [dt, m, y] = d?.split("/");
-   let [h, mi, s] = t?.split(":");
-
-   return `${dt}_${m}_${y}`;
+   return new Date().toDateString().split(" ").join("-");
 }
 
 class LoggerService {

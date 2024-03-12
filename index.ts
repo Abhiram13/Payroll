@@ -1,8 +1,8 @@
+require('dotenv').config();
+
 import { Mongo } from "./src/db";
 import {router} from './src/routes/export.router';
 import {Logger, server} from "./src/services/export.services";
-
-require('dotenv').config();
 
 export var MONGO = Mongo;
 
