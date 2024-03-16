@@ -5,8 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "npm install & tsc",
-    "prestart": "tsc",
-    "start": "ts-node-dev --respawn --transpile-only ./index.ts $SSL $PORT",
+    
+    "start": "ts-node-dev --respawn --transpile-only ./index.ts",
     "poststart": "echo \"Typescript server stopped\"",  
     "test": "jest"
   },

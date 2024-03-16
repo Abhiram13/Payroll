@@ -30,22 +30,22 @@ class LoggerService {
 
    static info(...arg: any): void {
       console.log(`\n[${LoggerService.#blue}]`, 'INFO', ...arg);      
-      appendFile(arg, 'INFO');
+      // appendFile(arg, 'INFO');
    }
 
    static error(error: Error, ...arg: any): void {
       console.log(`\n[${LoggerService.#red}]`, 'ERROR', ...arg, `\n\tname: [\x1b[31m${error.name}\x1b[0m]`, `\n\tmessage: ${error?.message}`);      
-      appendFile(arg, 'ERROR');
+      // appendFile(arg, 'ERROR');
    }
 
    static warn(...arg: any): void {
       console.log(`\n[${LoggerService.#yellow}]`, 'WARN', ...arg);
-      appendFile(arg, 'WARN');
+      // appendFile(arg, 'WARN');
    }
 
    static log(...arg: any): void {
       console.log(`\n[${LoggerService.#white}]`, 'LOG', ...arg);
-      appendFile(arg, 'LOG');
+      // appendFile(arg, 'LOG');
    }
 }
 
