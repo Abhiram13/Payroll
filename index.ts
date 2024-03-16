@@ -1,8 +1,8 @@
+require('dotenv').config();
+
 import { Mongo } from "./src/db";
 import {router} from './src/routes/export.router';
 import {Logger, server} from "./src/services/export.services";
-
-require('dotenv').config();
 
 export var MONGO = Mongo;
 
@@ -11,7 +11,7 @@ const testPort = process.env.TEST_PORT;
 const port = process.env.NODE_ENV !== 'test' ? serverPort : testPort;
 
 function StartServer(): void {
-   Mongo.connect();
+   // Mongo.connect();
    Logger.info(`TypeScript started on port ${port}!`);
 }
 

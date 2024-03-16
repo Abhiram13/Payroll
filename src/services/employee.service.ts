@@ -64,7 +64,7 @@ export async function fetchEmployee(req: Request, res: Response) {
    
       ApiReponse<any>({ res, status: StatusCode?.OK, result });
    } catch (e: any) {
-      Logger.error(e, 'Error at Fetch employee by Id API');
+      Logger.error(e, `Error at Fetch employee by Id API. Stack: ${e?.stack}`);
 
       let message: string;
       let status: StatusCode = StatusCode.SERVER_ERROR;

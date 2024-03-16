@@ -87,6 +87,18 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
    listen(port: number, callback: () => void): void {
       this.#httpServer.timeout = 20 * 1000;      
       this.#httpServer.listen(port, callback)
+      .on('error', (err) => {
+         const msg: string = "EADDRINUSE";
+         const val: string = err.message?.split(":")?.[0]?.split(" ")?.[1] || "";
+
+         if (val === msg) {
+            Logger.warn(`Server already running on given PORT: ${port} with PID: ${process.pid}. So, killing the process`);
+            process.kill(process.pid);
+            process.exit(1);
+            return;
+         }
+      });
+      
       this.#httpServer.on('request', (request: Request, response: Response) => {
          response.setHeader("Access-Control-Allow-Origin", (request?.headers?.origin || "*"));
          response.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
