@@ -1,5 +1,5 @@
 FROM node:18.19.0-alpine3.18
-ENV NODE_ENV=production
+ENV NODE_ENV=development
 WORKDIR /app 
 COPY package*.json ./
 RUN npm install
