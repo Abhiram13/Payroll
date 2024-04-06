@@ -87,21 +87,18 @@ export async function listOfOrganisations(req: Request, res: Response) {
    ApiReponse<IEmployeeSchema[]>({ res, status, message });   
 }
 
-// fetches list of organisation if loggedin user is super admin, 
-// else fetches only the organsation the user belongs to
+/**
+ * @param req 
+ * @param res
+ * @description fetches list of organisations. Only accessible for Super admin.
+ */
 export async function fetchOrganisation(req: Request, res: Response) {
    try {
       const token: IEncryptedToken | null = res?.locals?.payload;
       const controller = new OrganisationController();
       const roleController = new RolesController();
-      const role = await roleController.fetchRoleIdentifierByEmpRoleId(token?.roleId || "")
+      const role = await roleController.fetchRoleIdentifierByEmpRoleId(token?.roleId || "");
       let organisation: IOrganisationSchema | IOrganisationSchema[] | null = null;
-
-      if (role?.identifier === Role?.SuperAdmin) {
-         organisation = await controller?.list();
-      } else {
-         organisation = await controller.findById(token?.organisationId || "");
-      }
 
       const status: StatusCode = StatusCode?.OK;
       const message: string | undefined = organisation ? undefined : 'No Organisation found';

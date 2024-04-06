@@ -11,7 +11,7 @@ const testPort = process.env.TEST_PORT;
 const port = process.env.NODE_ENV !== 'test' ? serverPort : testPort;
 
 function StartServer(): void {
-   // Mongo.connect();
+   Mongo.connect();
    Logger.info(`TypeScript started on port ${port}!`);
 }
 
