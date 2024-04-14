@@ -5,7 +5,7 @@ import {StatusCode} from "../types/export.types";
 const router = new Router();
 
 router.use({path: '/api', middlewares: [authentication], router: apiRouter});
-router.get('/', (req, res) => {   
+router.get('/', (_, res) => {   
    res.json(StatusCode.OK, {statusCode: StatusCode.OK, message: "This is a ping"});
 });
 router.post('/login', login);

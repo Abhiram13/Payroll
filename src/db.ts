@@ -1,8 +1,6 @@
 import { MongoClient, Db } from "./types/export.types";
 import { Logger } from "./services/export.services";
 
-require('dotenv').config();
-
 class MongoDB {
    #url: string;
    #client: MongoClient;
