@@ -1,10 +1,10 @@
 // require('dotenv').config();
 
-// import { Mongo } from "./src/db";
+import { Mongo } from "./src/db";
 // import {router} from './src/routes/export.router';
 import {Logger, server} from "./src/services/export.services";
 
-// export var MONGO = Mongo;
+export var MONGO = Mongo;
 
 const serverPort = process.env.PORT || 3000;
 const testPort = process.env.TEST_PORT;
@@ -30,4 +30,4 @@ server.listen(Number(port), StartServer);
 //    process.exit(0);
 // });
 
-// export {server};
+export {server};
