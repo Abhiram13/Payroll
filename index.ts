@@ -1,7 +1,7 @@
 // require('dotenv').config();
 
 import { Mongo } from "./src/db";
-// import {router} from './src/routes/export.router';
+import {router} from './src/routes/export.router';
 import {Logger, server} from "./src/services/export.services";
 
 export var MONGO = Mongo;
@@ -17,7 +17,7 @@ function StartServer(): void {
 }
 
 server.listen(Number(port), StartServer);
-// server.use({ path: '', router: router });
+server.use({ path: '', router: router });
 
 // process.stdin.resume();
 
