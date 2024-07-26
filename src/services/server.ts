@@ -1,9 +1,9 @@
 import {RouterNameSpace, ServerNameSpace, Server, Request, Response, IncomingMessage, ServerResponse, Method, StatusCode} from "../types/export.types";
-import {Logger, Router} from "./export.services";
+import {Logger, Router, PayloadError} from "./export.services";
 
 class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNameSpace.IRouter {
    #httpServer: Server;
-   routeHandlers: RouterNameSpace.IRouterHandlers[];
+   routeHandlers: RouterNameSpace.IRouterHandlers[];   
 
    constructor () {
       super();
@@ -45,15 +45,26 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
    }
 
    #onEnd(api: RouterNameSpace.IRouterHandlers, request: Request, response: Response): void {
-      if (!request?.body) {
+      try {
+         if (!request?.body) {
+            response?.json(StatusCode.BAD_REQUEST, {
+               status: StatusCode.BAD_REQUEST,
+               message: "Invalid payload",
+            });
+            return;
+         }
+
+         new Sanitise(request?.body).init();
+
+         this.#processMiddlewares(api, request, response);
+      } catch (e: any) {
+         const error: Error = e;
          response?.json(StatusCode.BAD_REQUEST, {
             status: StatusCode.BAD_REQUEST,
             message: "Invalid payload",
          });
          return;
       }
-
-      this.#processMiddlewares(api, request, response);
    }
 
    #validateEndPointUrl(currentUrl: string, urlInMiddleware: string, params = {}, request: Request): boolean {
@@ -87,9 +98,9 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
    listen(port: number, callback: () => void): void {
       this.#httpServer.timeout = 20 * 1000;      
       this.#httpServer.listen(port, callback)
-      .on('error', (err) => {
+      .on('error', (error) => {
          const msg: string = "EADDRINUSE";
-         const val: string = err.message?.split(":")?.[0]?.split(" ")?.[1] || "";
+         const val: string = error.message?.split(":")?.[0]?.split(" ")?.[1] || "";
 
          if (val === msg) {
             Logger.warn(`Server already running on given PORT: ${port} with PID: ${process.pid}. So, killing the process`);
@@ -131,7 +142,7 @@ class PayrollServer extends Router implements ServerNameSpace.IServer, RouterNam
 }
 
 class MyResponse<Request extends IncomingMessage = IncomingMessage> extends ServerResponse<Request> {
-   #content_type: string = "application/json";
+   readonly #content_type: string = "application/json";
 
    locals = {};
 
@@ -148,6 +159,49 @@ class MyResponse<Request extends IncomingMessage = IncomingMessage> extends Serv
       }
 
       this.end();
+   }
+}
+
+class Sanitise {
+   private regex: RegExp = /^\$/;
+   constructor (private payload: any) {}
+
+   private objectSanitise(object: any) {
+      for (var key in object) {
+         if (this.regex.test(key)) {
+            throw new PayloadError('Invalid data provided');
+         }
+
+         if (object[key]?.constructor === Object) {
+            this.objectSanitise(object[key]);
+         }
+
+         if (object[key]?.constructor === Array) {
+            this.arraySanitise(object[key]);
+         }
+      }
+   }
+
+   private arraySanitise(array: any[]) {
+      array.map(value => {
+         if (value?.constructor === Object) {
+            this.objectSanitise(value);
+         }
+
+         if (value?.constructor === Array) {
+            this.arraySanitise(value);
+         }
+      });
+   }
+
+   public init() {
+      if (this.payload?.constructor === Object) {
+         this.objectSanitise(this.payload);
+      }
+
+      if (this.payload?.constructor === Array) {
+         this.arraySanitise(this.payload);
+      }
    }
 }
 
